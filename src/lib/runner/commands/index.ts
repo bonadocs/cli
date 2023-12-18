@@ -1,7 +1,7 @@
 import { hideBin } from 'yargs/helpers'
 
 import { RouterCommandProcessor } from '../router'
-import { PromptOption, RouterCommandProcessorOptions } from '../util'
+import { PromptOption } from '../util'
 
 import { CommonOptions } from './types'
 
@@ -42,18 +42,6 @@ class EntryCommandProcessor extends RouterCommandProcessor<
         default: false,
       },
     ]
-  }
-
-  async process(
-    options: Record<string, never> &
-      RouterCommandProcessorOptions<CommonOptions>,
-  ): Promise<void> {
-    if (!options.commandName) {
-      console.log(this.help)
-      return
-    }
-
-    return super.process(options)
   }
 
   get help() {
