@@ -97,7 +97,7 @@ export abstract class CommandProcessorBase<
 
 export abstract class RoutedProcessorBase<
   TContextOptions extends object,
-  TParsedOptions extends TContextOptions,
+  TParsedOptions extends TContextOptions = TContextOptions,
 > extends CommandProcessorBase<
   RouterCommandProcessorOptions<TContextOptions>,
   RouterCommandProcessorOptions<TParsedOptions>
