@@ -13,6 +13,11 @@ export abstract class RouterCommandProcessor<
   RouterCommandProcessorOptions<TParsedOptions>
 > {
   command: string | undefined
+
+  get enableExplicitHelp(): boolean {
+    return false
+  }
+
   parseOptions(command: string) {
     command = command.trim()
     const indexOfSpace = command.indexOf(' ')
@@ -27,7 +32,9 @@ export abstract class RouterCommandProcessor<
     ) {
       commandStack.push(...this.contextOptions.commandStack)
     }
-    commandStack.push(commandName)
+    if (commandName) {
+      commandStack.push(commandName)
+    }
 
     const options = this.parseCommandOptions(command)
     return executeWithValue(options, (options) => ({
@@ -38,23 +45,31 @@ export abstract class RouterCommandProcessor<
     }))
   }
 
-  async process(
-    options: TContextOptions & RouterCommandProcessorOptions<TParsedOptions>,
-  ) {
-    const command = this.command || ''
+  async process(options: RouterCommandProcessorOptions<TParsedOptions>) {
+    try {
+      if (!options.commandName) {
+        console.log(this.help)
+        return
+      }
 
-    const staticProcessor = await this.tryImportCommandProcessor(options)
-    if (staticProcessor) {
-      return staticProcessor.run(command)
+      const command = this.command || ''
+
+      let processor = await this.tryImportCommandProcessor(options)
+      if (!processor) {
+        processor = await this.tryImportDynamicCommandProcessor(options)
+      }
+
+      // When the command is empty and the current command is a router
+      if (!processor) {
+        console.log(`Command '${options.commandName}' not found`)
+        console.log(this.help)
+        return
+      }
+
+      return processor.run(command)
+    } catch {
+      console.log(this.help)
     }
-
-    const dynamicProcessor =
-      await this.tryImportDynamicCommandProcessor(options)
-    if (dynamicProcessor) {
-      return dynamicProcessor.run(command)
-    }
-
-    throw new Error(`Command ${options.commandName} not found`)
   }
 
   protected parseCommandOptions(
