@@ -1,18 +1,11 @@
-﻿import { CollectionWithId } from './types'
+﻿import { getLocalCollectionNames } from '@bonadocs/core'
+
+import { CollectionWithId } from './types'
 
 export async function getLocalCollections(): Promise<CollectionWithId[]> {
-  return [
-    {
-      id: 'collection1',
-      name: 'Collection 1',
-    },
-    {
-      id: 'collection2',
-      name: 'Collection 2',
-    },
-    {
-      id: 'collection3',
-      name: 'Collection 3',
-    },
-  ]
+  const collections = await getLocalCollectionNames()
+  return Object.entries(collections).map(([id, { name }]) => ({
+    id,
+    name,
+  }))
 }
