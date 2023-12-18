@@ -1,9 +1,10 @@
-﻿import { PromptOption, RoutedProcessorBase } from '../../util'
+﻿import { createCollection } from '../../../integrations/core'
+import { PromptOption, RoutedProcessorBase } from '../../util'
 import { CommonOptions } from '../types'
 
 type CreateCollectionOptions = {
-  name?: string
-  description?: string
+  name: string
+  description: string
 } & CommonOptions
 
 export default class CreateCollectionCommandProcessor extends RoutedProcessorBase<
@@ -36,7 +37,8 @@ export default class CreateCollectionCommandProcessor extends RoutedProcessorBas
   }
 
   async process(options: CreateCollectionOptions) {
-    console.log('Creating collection', options)
+    const manager = await createCollection(options.name, options.description)
+    console.log(`Created collection ${options.name} (${manager.id})`)
   }
 
   get help() {
