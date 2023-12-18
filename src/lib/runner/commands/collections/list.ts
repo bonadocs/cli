@@ -9,7 +9,7 @@ export default class ListCollectionsCommandProcessor extends RoutedProcessorBase
 
   async process() {
     const collections = await getLocalCollections()
-    console.log('Listing collection:')
+    console.log('Listing collections:')
     console.log(
       collections.map((c, i) => `${i + 1}. ${c.name} (${c.id})`).join(`\n`),
     )
