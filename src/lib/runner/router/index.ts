@@ -1,5 +1,6 @@
 ﻿import {
   CommandProcessorBase,
+  executeWithValue,
   parseOptions,
   RouterCommandProcessorOptions,
 } from '../util'
@@ -28,22 +29,13 @@ export abstract class RouterCommandProcessor<
     }
     commandStack.push(commandName)
 
-    const options = this.parseCommandOptions(commandName)
-    if ('then' in options) {
-      return options.then((options) => ({
-        ...this.contextOptions,
-        ...options,
-        commandName,
-        commandStack,
-      }))
-    }
-
-    return {
+    const options = this.parseCommandOptions(command)
+    return executeWithValue(options, (options) => ({
       ...this.contextOptions,
       ...options,
       commandName,
       commandStack,
-    }
+    }))
   }
 
   async process(
@@ -71,9 +63,9 @@ export abstract class RouterCommandProcessor<
     const isInteractivityDisabled =
       'disableInteractivity' in this.contextOptions &&
       this.contextOptions.disableInteractivity === 'true'
-    return parseOptions(this.options, command, isInteractivityDisabled) as
-      | TParsedOptions
-      | Promise<TParsedOptions>
+    return executeWithValue(this.options, (options) =>
+      parseOptions<TParsedOptions>(options, command, isInteractivityDisabled),
+    )
   }
 
   private async tryImportCommandProcessor(

@@ -1,5 +1,5 @@
 ﻿import inquirer, { InputQuestion, Question } from 'inquirer'
-import yargs, { Choices, Options } from 'yargs'
+import yargs, { Options } from 'yargs'
 
 type PrimitiveOptionValue = string | number | boolean
 type OptionValue = PrimitiveOptionValue | PrimitiveOptionValue[]
@@ -11,13 +11,25 @@ export type RouterCommandProcessorOptions<
   commandStack: string[]
 } & T
 
+export type Choice =
+  | string
+  | number
+  | {
+      name: string
+      value: string | number
+    }
+
 export type PromptOption = {
   name: string
   aliases: string[]
   prompt: string
   description?: string
   required?: boolean
-  choices?: Choices
+  choices?: Choice[]
+  validationErrorMessage?: string
+  validate?: (
+    value: string | number | boolean | PrimitiveOptionValue[],
+  ) => boolean | Promise<boolean>
 } & (
   | {
       type: 'string'
@@ -60,15 +72,15 @@ export abstract class CommandProcessorBase<
 
   abstract get help(): string
 
-  abstract get options(): PromptOption[]
+  abstract get options(): PromptOption[] | Promise<PromptOption[]>
 
   parseOptions(command: string): TParsedOptions | Promise<TParsedOptions> {
     const isInteractivityDisabled =
       'disableInteractivity' in this.contextOptions &&
-      this.contextOptions.disableInteractivity === 'false'
-    return parseOptions(this.options, command, isInteractivityDisabled) as
-      | TParsedOptions
-      | Promise<TParsedOptions>
+      this.contextOptions.disableInteractivity === true
+    return executeWithValue(this.options, (options) =>
+      parseOptions<TParsedOptions>(options, command, isInteractivityDisabled),
+    )
   }
 
   async process(options: TContextOptions & TParsedOptions): Promise<void> {
@@ -87,7 +99,7 @@ export abstract class RoutedProcessorBase<
   RouterCommandProcessorOptions<TParsedOptions>
 > {}
 
-export function parseOptions<T>(
+export function parseOptions<T extends object>(
   promptOptions: PromptOption[],
   command: string,
   isInteractivityDisabled: boolean,
@@ -101,29 +113,26 @@ export function parseOptions<T>(
             description: option.description,
             type: option.type,
             default: option.default,
+            choices: option.choices?.map((c) =>
+              typeof c === 'string' || typeof c === 'number' ? c : c.value,
+            ),
           }
           return options
         },
         {} as Record<string, Options>,
       ),
     )
-    .parse()
+    .parse() as unknown as T
 
-  if (isInteractivityDisabled) {
-    return options as T | Promise<T>
-  }
-
-  if ('then' in options) {
-    return (options as Promise<Record<string, OptionValue>>).then(
-      (parsedOptions: Record<string, OptionValue>) =>
-        promptUserForOptions(promptOptions, parsedOptions),
+  if (!isInteractivityDisabled) {
+    return promptUserForOptions<T>(
+      promptOptions,
+      options as Record<string, OptionValue>,
     )
   }
 
-  return promptUserForOptions(
-    promptOptions,
-    options as Record<string, OptionValue>,
-  )
+  validateOptionValues(promptOptions, options as Record<string, OptionValue>)
+  return options
 }
 
 async function promptUserForOptions<T>(
@@ -141,10 +150,9 @@ async function promptUserForOptions<T>(
 
   const answers = await showPrompt(pendingOptions)
 
-  return {
-    ...parsedOptions,
-    ...answers,
-  } as T
+  const finalOptions = { ...parsedOptions, ...answers }
+  validateOptionValues(promptOptions, finalOptions)
+  return finalOptions as T
 }
 
 function showPrompt(
@@ -154,6 +162,18 @@ function showPrompt(
     name: option.name,
     message: option.prompt,
     default: option.default,
+    choices: option.choices,
+    validate: (value) => {
+      if (option.required && value == null) {
+        return false
+      }
+
+      if (option.validate == null) {
+        return true
+      }
+
+      return option.validate(value as never)
+    },
     ...mapTypeBasedParams(option),
   }))
   return inquirer.prompt(questions)
@@ -179,7 +199,7 @@ function mapTypeBasedParams(option: PromptOption): Partial<Question> {
 
   if (type === 'array' && params.type === 'input') {
     const inputParams = params as InputQuestion
-    inputParams.transformer = (input) => {
+    inputParams.filter = (input) => {
       return input
         .split(option.delimiter || ',')
         .map((s: string | number) => (typeof s === 'string' ? s.trim() : s))
@@ -191,4 +211,40 @@ function mapTypeBasedParams(option: PromptOption): Partial<Question> {
   }
 
   return params
+}
+
+export function isPromise<T extends object>(
+  value: T | Promise<T>,
+): value is Promise<T> {
+  return 'then' in value
+}
+
+export function executeWithValue<T extends object, V>(
+  value: T | Promise<T>,
+  func: (a: T) => V | Promise<V>,
+): V | Promise<V> {
+  return isPromise(value) ? value.then((v) => func(v)) : func(value)
+}
+
+function validateOptionValues(
+  options: PromptOption[],
+  values: Record<string, OptionValue>,
+) {
+  const errors = []
+  for (const option of options) {
+    if (option.required && values[option.name] == null) {
+      errors.push(`${option.name} is required`)
+    } else if (option.validate && !option.validate(values[option.name])) {
+      errors.push(option.validationErrorMessage || `${option.name} is invalid`)
+    }
+  }
+
+  if (errors.length) {
+    terminateWithValidationErrors(errors)
+  }
+}
+
+function terminateWithValidationErrors(errors: string[]) {
+  console.error(`Command failed with errors:\n${errors.join('\n')}`)
+  process.exit(1)
 }
