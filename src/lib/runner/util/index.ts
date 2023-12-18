@@ -67,7 +67,16 @@ export abstract class CommandProcessorBase<
       ...(await this.parseOptions(command)),
     }
 
+    if (this.enableExplicitHelp && 'help' in options && options.help) {
+      console.log(this.help)
+      return
+    }
+
     await this.process(options)
+  }
+
+  get enableExplicitHelp(): boolean {
+    return true
   }
 
   abstract get help(): string
@@ -83,12 +92,7 @@ export abstract class CommandProcessorBase<
     )
   }
 
-  async process(options: TContextOptions & TParsedOptions): Promise<void> {
-    if ('help' in options && options.help) {
-      console.log(this.help)
-      return
-    }
-  }
+  abstract process(_: TParsedOptions): Promise<void>
 }
 
 export abstract class RoutedProcessorBase<
@@ -122,17 +126,22 @@ export function parseOptions<T extends object>(
         {} as Record<string, Options>,
       ),
     )
-    .parse() as unknown as T
+    .help(false)
+    .parse() as Record<string, OptionValue>
 
-  if (!isInteractivityDisabled) {
-    return promptUserForOptions<T>(
-      promptOptions,
-      options as Record<string, OptionValue>,
-    )
+  fixHelp(options)
+
+  // skip validation and prompts if help is requested
+  if (options.help) {
+    return options as T
   }
 
-  validateOptionValues(promptOptions, options as Record<string, OptionValue>)
-  return options
+  if (!isInteractivityDisabled) {
+    return promptUserForOptions<T>(promptOptions, options)
+  }
+
+  validateOptionValues(promptOptions, options)
+  return options as T
 }
 
 async function promptUserForOptions<T>(
@@ -141,6 +150,7 @@ async function promptUserForOptions<T>(
 ): Promise<T> {
   const pendingOptions = []
   for (const option of promptOptions) {
+    // skip options that have already been provided
     if (parsedOptions[option.name] != null) {
       continue
     }
@@ -247,4 +257,14 @@ function validateOptionValues(
 function terminateWithValidationErrors(errors: string[]) {
   console.error(`Command failed with errors:\n${errors.join('\n')}`)
   process.exit(1)
+}
+
+// yargs disables help and loses the help config so we must add it back manually
+function fixHelp(options: Record<string, OptionValue>) {
+  if (options.h) {
+    options.help = true
+  } else {
+    options.help = false
+    options.h = false
+  }
 }
