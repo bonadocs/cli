@@ -40,7 +40,10 @@
 
     "lib": ["es2022"],
     "types": ["node"],
-    "typeRoots": ["node_modules/@types", "src/types"]
+    "typeRoots": ["node_modules/@types", "src/types"],
+    "paths": {
+      "#commands": ["./src/lib/runner/commands"],
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**"],

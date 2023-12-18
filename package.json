@@ -9,7 +9,8 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "build": "run-p build:*",
+    "cli": "node build/main/cli.js",
+    "build": "run-p build:* && shx cp ./package.json build/main/package.json && shx cp ./package.json build/module/package.json",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "fix": "run-s fix:*",
@@ -42,11 +43,13 @@
     "node": ">=20"
   },
   "dependencies": {
+    "inquirer": "^8.2.6",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/inquirer": "^8.2.10",
     "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
@@ -62,6 +65,7 @@
     "nyc": "^15.1.0",
     "open-cli": "^7.2.0",
     "prettier": "^3.1.1",
+    "shx": "^0.3.4",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
     "typedoc": "^0.25.4",
@@ -76,6 +80,10 @@
     "LICENSE",
     "README.md"
   ],
+  "imports": {
+    "#commands": "./lib/runner/commands/index.js",
+    "#commands/*": "./lib/runner/commands/*.js"
+  },
   "ava": {
     "failFast": true,
     "timeout": "60s",
