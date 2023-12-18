@@ -43,6 +43,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@bonadocs/core": "^1.0.0-alpha.1",
     "inquirer": "^8.2.6",
     "yargs": "^17.7.2"
   },
