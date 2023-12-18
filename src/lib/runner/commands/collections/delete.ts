@@ -1,12 +1,8 @@
-﻿import { PromptOption, RoutedProcessorBase } from '../../util'
+﻿import { getLocalCollections } from '../../../integrations/core'
+import { PromptOption, RoutedProcessorBase } from '../../util'
 import { CommonOptions } from '../types'
 
 import { CollectionOptions } from './types'
-
-type CollectionWithId = {
-  id: string
-  name: string
-}
 
 export default class DeleteCollectionCommandProcessor extends RoutedProcessorBase<
   CommonOptions,
@@ -21,7 +17,7 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
   }
 
   private async getOptions(): Promise<PromptOption[]> {
-    const choices = await this.getCollectionsWithIds()
+    const collectionWithIds = await getLocalCollections()
     return [
       {
         name: 'collection-id',
@@ -29,7 +25,7 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
         prompt: 'Which collection do you want to delete?',
         type: 'string',
         required: true,
-        choices: choices.map((choice) => {
+        choices: collectionWithIds.map((choice) => {
           return {
             name: choice.name,
             value: choice.id,
@@ -37,25 +33,11 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
         }),
         validationErrorMessage: 'The specified collection does not exist.',
         validate: (value) => {
-          return choices.some((collection) => collection.id === value) ?? false
+          return (
+            collectionWithIds.some((collection) => collection.id === value) ??
+            false
+          )
         },
-      },
-    ]
-  }
-
-  private async getCollectionsWithIds(): Promise<CollectionWithId[]> {
-    return [
-      {
-        id: 'collection1',
-        name: 'Collection 1',
-      },
-      {
-        id: 'collection2',
-        name: 'Collection 2',
-      },
-      {
-        id: 'collection3',
-        name: 'Collection 3',
       },
     ]
   }
