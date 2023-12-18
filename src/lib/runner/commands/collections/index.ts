@@ -1,9 +1,8 @@
 ﻿import { RouterCommandProcessor } from '../../router'
-import { PromptOption } from '../../util'
 import { CommonOptions } from '../types'
 
-export default class RootCollectionCommandProcessor extends RouterCommandProcessor<CommonOptions> {
-  get options(): PromptOption[] {
+export default class RootCollectionsCommandProcessor extends RouterCommandProcessor<CommonOptions> {
+  get options() {
     return []
   }
 
@@ -15,6 +14,7 @@ Commands:
   delete                          Delete collection
   list                            List collections
   rename                          Rename collection
+  [id]                            Manage collection with id
 
 Options:
   -I, --disable-interactivity     Disable interactivity
