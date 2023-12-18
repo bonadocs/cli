@@ -218,10 +218,10 @@
     "@babel/helper-validator-identifier" "^7.22.20"
     to-fast-properties "^2.0.0"
 
-"@bonadocs/core@^1.0.0-alpha.1":
-  version "1.0.0-alpha.1"
-  resolved "https://npm.pkg.github.com/download/@bonadocs/core/1.0.0-alpha.1/86495963d40cfa372ede0e2ec6a9185ae1a27a7c#86495963d40cfa372ede0e2ec6a9185ae1a27a7c"
-  integrity sha512-Pu/HqAEKi4CrWN4QkgXBkjNO/qPHyN/9pWMAM2fbRwegj8jOyZfeUXQpttEIrytoEpmZf4dAthpSoBBQBRRGvQ==
+"@bonadocs/core@1.0.0-alpha.2":
+  version "1.0.0"
+  resolved "https://npm.pkg.github.com/download/@bonadocs/core/1.0.0-alpha.2/346f20206ffd6952393d10af6251196325f80548#346f20206ffd6952393d10af6251196325f80548"
+  integrity sha512-K/Ol9+1XWptBgFmiQSglFOgeaZFWwVZI9PzdOfab3GZVHpXkUsL7NSvqYBR46DA4sFU9z3Qehqsc/iQ5yxPiVg==
   dependencies:
     axios "^1.6.2"
     ethers "^6.9.0"
