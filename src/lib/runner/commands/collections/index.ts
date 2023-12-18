@@ -1,5 +1,5 @@
 ﻿import { RouterCommandProcessor } from '../../router'
-import { PromptOption, RouterCommandProcessorOptions } from '../../util'
+import { PromptOption } from '../../util'
 import { CommonOptions } from '../types'
 
 export default class RootCollectionCommandProcessor extends RouterCommandProcessor<CommonOptions> {
@@ -7,22 +7,14 @@ export default class RootCollectionCommandProcessor extends RouterCommandProcess
     return []
   }
 
-  async process(options: RouterCommandProcessorOptions<CommonOptions>) {
-    try {
-      await super.process(options)
-    } catch {
-      console.log(this.help)
-    }
-  }
-
   get help() {
     return `Usage collections <command> [options]
 
 Commands:
   create                          Create collection
-  delete                          Create collection
-  list                            Create collection
-  rename                          Create collection
+  delete                          Delete collection
+  list                            List collections
+  rename                          Rename collection
 
 Options:
   -I, --disable-interactivity     Disable interactivity
