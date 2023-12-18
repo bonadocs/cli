@@ -26,7 +26,7 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
       {
         name: 'collection-id',
         aliases: ['c'],
-        prompt: 'Id:',
+        prompt: 'Which collection do you want to delete?',
         type: 'string',
         required: true,
         choices: choices.map((choice) => {
