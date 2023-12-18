@@ -19,7 +19,7 @@ export default class RenameCollectionCommandProcessor extends RoutedProcessorBas
     const collectionWithIds = await getLocalCollections()
     return [
       {
-        name: 'collection-id',
+        name: 'collectionId',
         aliases: ['c'],
         prompt: 'Which collection do you want to delete?',
         type: 'string',

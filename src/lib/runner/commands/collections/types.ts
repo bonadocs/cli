@@ -1,5 +1,5 @@
 ﻿import { CommonOptions } from '../types'
 
 export type CollectionOptions = {
-  'collection-id': string
+  collectionId: string
 } & CommonOptions
