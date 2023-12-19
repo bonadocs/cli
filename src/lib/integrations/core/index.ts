@@ -18,8 +18,7 @@ export async function getLocalCollections(): Promise<CollectionWithId[]> {
 
 export async function createCollection(name: string, description: string) {
   const manager = Collection.createBlankCollection(name, description).manager()
-  const metadataView = new CollectionMetadataView(manager)
-  await metadataView.rename(name)
+  await manager.save()
   return manager
 }
 
@@ -30,7 +29,7 @@ export async function loadCollectionFromIPFS(uri: string) {
 
 export async function renameCollection(id: string, name: string) {
   const store = await getCollectionStore(id)
-  const snapshot = await store.get('id')
+  const snapshot = await store.get('data')
   if (!snapshot) {
     throw new Error(`Collection ${id} not found`)
   }
