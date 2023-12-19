@@ -29,6 +29,10 @@ export default class RootCollectionCommandProcessor extends RouterCommandProcess
         name: 'workflows',
         description: 'Manage workflows in this collection',
       },
+      {
+        name: 'display',
+        description: 'Display this collection',
+      },
     ]
   }
 }
