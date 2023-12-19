@@ -1,6 +1,8 @@
 ﻿import { getLocalCollections } from '../../../integrations/core'
-import { PromptOption, RoutedProcessorBase } from '../../util'
+import { PromptOption } from '../../util'
 import { CommonOptions } from '../types'
+
+import { RoutedProcessorBase } from '#commands'
 
 export default class ListCollectionsCommandProcessor extends RoutedProcessorBase<CommonOptions> {
   get options(): PromptOption[] {
@@ -15,7 +17,7 @@ export default class ListCollectionsCommandProcessor extends RoutedProcessorBase
     )
   }
 
-  get help() {
+  protected get commandDescription(): string {
     return 'List all collections on this device'
   }
 }

@@ -1,26 +1,30 @@
 ﻿import { RouterCommandProcessor } from '../../router'
-import { CommonOptions } from '../types'
+
+import { CommandDescription, CommonOptions } from '#commands'
 
 export default class RootCollectionsCommandProcessor extends RouterCommandProcessor<CommonOptions> {
   get options() {
     return []
   }
 
-  get help() {
-    return `Usage collections <command> [options]
-
-Commands:
-  create                          Create collection
-  delete                          Delete collection
-  list                            List collections
-  rename                          Rename collection
-  [id]                            Manage collection with id
-
-Options:
-  -I, --disable-interactivity     Disable interactivity
-
-Get options for a specific command with:
-  bonadocs <command> --help
-`
+  protected get commands(): CommandDescription[] {
+    return [
+      {
+        name: 'create',
+        description: 'Create a new collection',
+      },
+      {
+        name: 'list',
+        description: 'List all collections',
+      },
+      {
+        name: 'delete',
+        description: 'Delete a collection',
+      },
+      {
+        name: 'rename',
+        description: 'Rename a collection',
+      },
+    ]
   }
 }

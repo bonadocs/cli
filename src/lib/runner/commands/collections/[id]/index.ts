@@ -2,6 +2,8 @@
 import { RouterCommandProcessorOptions } from '../../../util'
 import { CollectionOptions } from '../types'
 
+import { CommandDescription } from '#commands'
+
 export default class RootCollectionCommandProcessor extends RouterCommandProcessor<
   RouterCommandProcessorOptions<CollectionOptions>
 > {
@@ -17,19 +19,16 @@ export default class RootCollectionCommandProcessor extends RouterCommandProcess
     return []
   }
 
-  get help() {
-    return `Usage ${this.contextOptions.collectionId} <command> [options]
-
-Commands:
-  contracts                       Manage contracts in collection
-  workflows                       Manage workflows in collection
-  print                           Print collection as json
-
-Options:
-  -I, --disable-interactivity     Disable interactivity
-
-Get options for a specific command with:
-  bonadocs <command> --help
-`
+  protected get commands(): CommandDescription[] {
+    return [
+      {
+        name: 'contracts',
+        description: 'Manage contracts in this collection',
+      },
+      {
+        name: 'workflows',
+        description: 'Manage workflows in this collection',
+      },
+    ]
   }
 }

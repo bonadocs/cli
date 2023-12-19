@@ -2,8 +2,10 @@
   getLocalCollections,
   renameCollection,
 } from '../../../integrations/core'
-import { PromptOption, RoutedProcessorBase } from '../../util'
+import { PromptOption } from '../../util'
 import { CommonOptions } from '../types'
+
+import { RoutedProcessorBase } from '#commands'
 
 type RenameCollectionOptions = {
   collectionId: string
@@ -70,12 +72,7 @@ export default class RenameCollectionCommandProcessor extends RoutedProcessorBas
     )
   }
 
-  get help() {
-    return `Rename the collection with the specified id to name
-
-Options
-  --collection-id | -c <id>       Id of the collection to rename
-  --name | -n <name>              New name to set
-`
+  protected get commandDescription(): string {
+    return 'Rename the collection with the specified id to name'
   }
 }

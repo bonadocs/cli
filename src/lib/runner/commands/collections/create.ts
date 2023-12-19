@@ -1,6 +1,8 @@
 ﻿import { createCollection } from '../../../integrations/core'
-import { PromptOption, RoutedProcessorBase } from '../../util'
+import { PromptOption } from '../../util'
 import { CommonOptions } from '../types'
+
+import { RoutedProcessorBase } from '#commands'
 
 type CreateCollectionOptions = {
   name: string
@@ -41,12 +43,7 @@ export default class CreateCollectionCommandProcessor extends RoutedProcessorBas
     console.log(`Created collection ${options.name} (${manager.id})`)
   }
 
-  get help() {
-    return `Create a new collection with the provided name and description.
-
-Options
-  --name <name>           Name of the collection
-  --description <desc>    Description of the collection
-`
+  protected get commandDescription(): string {
+    return 'Create a new collection with the provided name and description.'
   }
 }

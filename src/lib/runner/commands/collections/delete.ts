@@ -2,10 +2,12 @@
   deleteCollection,
   getLocalCollections,
 } from '../../../integrations/core'
-import { PromptOption, RoutedProcessorBase } from '../../util'
+import { PromptOption } from '../../util'
 import { CommonOptions } from '../types'
 
 import { CollectionOptions } from './types'
+
+import { RoutedProcessorBase } from '#commands'
 
 export default class DeleteCollectionCommandProcessor extends RoutedProcessorBase<
   CommonOptions,
@@ -46,11 +48,7 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
     ]
   }
 
-  get help() {
-    return `Delete the collection with the provided id.
-
-Options
-  --collection-id <id>           The id of the collection to be deleted
-`
+  protected get commandDescription(): string {
+    return 'Delete the collection with the provided id.'
   }
 }
