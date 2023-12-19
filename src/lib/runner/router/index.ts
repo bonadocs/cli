@@ -1,9 +1,11 @@
 ﻿import {
-  CommandProcessorBase,
   executeWithValue,
   parseOptions,
+  PromptOption,
   RouterCommandProcessorOptions,
 } from '../util'
+
+import { CommandDescription, CommandProcessorBase } from '#commands'
 
 export abstract class RouterCommandProcessor<
   TContextOptions extends object | RouterCommandProcessorOptions,
@@ -16,6 +18,21 @@ export abstract class RouterCommandProcessor<
 
   get enableExplicitHelp(): boolean {
     return false
+  }
+
+  get help(): string | Promise<string> {
+    return executeWithValue(this.options, (options) => {
+      return this.joinHelpParts([
+        this.commandDescription,
+        this.getUsageString(options),
+        this.getCommandHelp(),
+        this.getOptionsHelp(options),
+      ])
+    })
+  }
+
+  protected getUsageString(options: PromptOption[]): string {
+    return super.getUsageString(options) + ' <command> [options]'
   }
 
   parseOptions(command: string) {
@@ -48,7 +65,7 @@ export abstract class RouterCommandProcessor<
   async process(options: RouterCommandProcessorOptions<TParsedOptions>) {
     try {
       if (!options.commandName) {
-        console.log(this.help)
+        this.printHelp()
         return
       }
 
@@ -62,15 +79,21 @@ export abstract class RouterCommandProcessor<
       // When the command is empty and the current command is a router
       if (!processor) {
         console.log(`Command '${options.commandName}' not found`)
-        console.log(this.help)
+        this.printHelp()
         return
       }
 
       return processor.run(command)
     } catch {
-      console.log(this.help)
+      this.printHelp()
     }
   }
+
+  protected get commandDescription(): string {
+    return ''
+  }
+
+  protected abstract get commands(): CommandDescription[]
 
   protected parseCommandOptions(
     command: string,
@@ -80,6 +103,21 @@ export abstract class RouterCommandProcessor<
       this.contextOptions.disableInteractivity === 'true'
     return executeWithValue(this.options, (options) =>
       parseOptions<TParsedOptions>(options, command, isInteractivityDisabled),
+    )
+  }
+
+  private getCommandHelp(): string {
+    if (!this.commands.length) {
+      return ''
+    }
+
+    return (
+      'Commands:\n' +
+      this.commands
+        .map((command) => {
+          return `  ${command.name.padEnd(30)} ${command.description}`
+        })
+        .join('\n')
     )
   }
 
