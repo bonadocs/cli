@@ -52,6 +52,7 @@ Commands:
 
 Options:
   -I, --disable-interactivity     Disable interactivity
+  -h, --help                      Show help message
 
 Get options for a specific command with:
   bonadocs <command> --help
