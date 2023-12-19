@@ -179,17 +179,7 @@ export abstract class RouterCommandProcessor<
   ) {
     try {
       return await this.instantiateCommandProcessor(moduleName, options)
-    } catch (e) {
-      if (
-        !!e &&
-        typeof e === 'object' &&
-        'code' in e &&
-        e.code === 'MODULE_NOT_FOUND'
-      ) {
-        return null
-      }
-
-      console.error(e)
+    } catch {
       return null
     }
   }
