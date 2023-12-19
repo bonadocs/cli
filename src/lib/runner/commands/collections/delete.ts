@@ -1,4 +1,7 @@
-﻿import { getLocalCollections } from '../../../integrations/core'
+﻿import {
+  deleteCollection,
+  getLocalCollections,
+} from '../../../integrations/core'
 import { PromptOption, RoutedProcessorBase } from '../../util'
 import { CommonOptions } from '../types'
 
@@ -13,7 +16,8 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
   }
 
   async process(options: CollectionOptions) {
-    console.log('Deleting collection', options)
+    await deleteCollection(options.collectionId)
+    console.log(`Collection ${options.collectionId} deleted.`)
   }
 
   private async getOptions(): Promise<PromptOption[]> {
@@ -46,7 +50,7 @@ export default class DeleteCollectionCommandProcessor extends RoutedProcessorBas
     return `Delete the collection with the provided id.
 
 Options
-  --id <id>           The id of the collection to be deleted
+  --collection-id <id>           The id of the collection to be deleted
 `
   }
 }
