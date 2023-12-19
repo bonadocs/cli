@@ -129,6 +129,10 @@ function showPrompt(
         return true
       }
 
+      if (option.choices && !option.choices.some((c) => c === value)) {
+        return false
+      }
+
       return option.validate(value as never)
     },
     ...mapTypeBasedParams(option),
