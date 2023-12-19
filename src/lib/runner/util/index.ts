@@ -50,59 +50,6 @@ export type PromptOption = {
     }
 )
 
-/**
- * A CommandProcessor is expected to be exported as a default export
- * from the file that defines the command. The subclass constructor
- * must match the definition of the CommandProcessorBase constructor.
- */
-export abstract class CommandProcessorBase<
-  TContextOptions extends object,
-  TParsedOptions extends TContextOptions,
-> {
-  protected constructor(protected readonly contextOptions: TContextOptions) {}
-
-  async run(command: string) {
-    const options = {
-      ...this.contextOptions,
-      ...(await this.parseOptions(command)),
-    }
-
-    if (this.enableExplicitHelp && 'help' in options && options.help) {
-      console.log(this.help)
-      return
-    }
-
-    await this.process(options)
-  }
-
-  get enableExplicitHelp(): boolean {
-    return true
-  }
-
-  abstract get help(): string
-
-  abstract get options(): PromptOption[] | Promise<PromptOption[]>
-
-  parseOptions(command: string): TParsedOptions | Promise<TParsedOptions> {
-    const isInteractivityDisabled =
-      'disableInteractivity' in this.contextOptions &&
-      this.contextOptions.disableInteractivity === true
-    return executeWithValue(this.options, (options) =>
-      parseOptions<TParsedOptions>(options, command, isInteractivityDisabled),
-    )
-  }
-
-  abstract process(_: TParsedOptions): Promise<void>
-}
-
-export abstract class RoutedProcessorBase<
-  TContextOptions extends object,
-  TParsedOptions extends TContextOptions = TContextOptions,
-> extends CommandProcessorBase<
-  RouterCommandProcessorOptions<TContextOptions>,
-  RouterCommandProcessorOptions<TParsedOptions>
-> {}
-
 export function parseOptions<T extends object>(
   promptOptions: PromptOption[],
   command: string,
@@ -223,13 +170,11 @@ function mapTypeBasedParams(option: PromptOption): Partial<Question> {
   return params
 }
 
-export function isPromise<T extends object>(
-  value: T | Promise<T>,
-): value is Promise<T> {
-  return 'then' in value
+export function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
+  return typeof value === 'object' && value != null && 'then' in value
 }
 
-export function executeWithValue<T extends object, V>(
+export function executeWithValue<T, V>(
   value: T | Promise<T>,
   func: (a: T) => V | Promise<V>,
 ): V | Promise<V> {
