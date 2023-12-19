@@ -1,11 +1,19 @@
-﻿import {
+﻿import * as path from 'path'
+
+import {
   executeWithValue,
   parseOptions,
   PromptOption,
   RouterCommandProcessorOptions,
 } from '../util'
 
-import { CommandDescription, CommandProcessorBase } from '#commands'
+import { findCommandProcessorModule } from './util'
+
+import {
+  CommandDescription,
+  CommandProcessorBase,
+  fileName as commandsRootFileName,
+} from '#commands'
 
 export abstract class RouterCommandProcessor<
   TContextOptions extends object | RouterCommandProcessorOptions,
@@ -121,41 +129,29 @@ export abstract class RouterCommandProcessor<
     )
   }
 
-  private async tryImportCommandProcessor(
+  private tryImportCommandProcessor(
     options: RouterCommandProcessorOptions<TParsedOptions>,
   ) {
-    const result = await this.tryInstantiateCommandProcessor(
+    return this.tryInstantiateCommandProcessor(
       `#commands/${options.commandStack.join('/')}`,
       options,
-    )
-
-    return (
-      result ||
-      (await this.tryInstantiateCommandProcessor(
-        `#commands/${options.commandStack.join('/')}/index`.replace('//', '/'),
-        options,
-      ))
     )
   }
 
   private async tryImportDynamicCommandProcessor(
     options: RouterCommandProcessorOptions<TParsedOptions>,
   ) {
-    const result = await this.tryInstantiateCommandProcessor(
-      `#commands/${
-        options.commandStack.slice(0, -1).join('/') + '/[id]'
-      }`.replace('//', '/'),
-      options,
+    const root = path.dirname(commandsRootFileName)
+    const moduleName = await findCommandProcessorModule(
+      root,
+      options.commandStack,
     )
-    return (
-      result ||
-      (await this.tryInstantiateCommandProcessor(
-        `#commands/${
-          options.commandStack.slice(0, -1).join('/') + '/[id]/index'
-        }`.replace('//', '/'),
-        options,
-      ))
-    )
+
+    if (!moduleName) {
+      return null
+    }
+    console.log(`Importing command processor from ${moduleName}`)
+    return this.tryInstantiateCommandProcessor(moduleName, options)
   }
 
   private async instantiateCommandProcessor(
@@ -180,7 +176,14 @@ export abstract class RouterCommandProcessor<
     try {
       return await this.instantiateCommandProcessor(moduleName, options)
     } catch {
-      return null
+      try {
+        return await this.instantiateCommandProcessor(
+          moduleName + '/index',
+          options,
+        )
+      } catch {
+        return null
+      }
     }
   }
 }
