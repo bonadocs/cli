@@ -1,4 +1,7 @@
-﻿import { getLocalCollections } from '../../../integrations/core'
+﻿import {
+  getLocalCollections,
+  renameCollection,
+} from '../../../integrations/core'
 import { PromptOption, RoutedProcessorBase } from '../../util'
 import { CommonOptions } from '../types'
 
@@ -52,15 +55,27 @@ export default class RenameCollectionCommandProcessor extends RoutedProcessorBas
   }
 
   async process(options: RenameCollectionOptions) {
-    console.log('Renaming collection', options)
+    const collections = await getLocalCollections()
+    const collection = collections.find(
+      (collection) => collection.id === options.collectionId,
+    )
+    if (!collection) {
+      console.error('Collection not found')
+      return
+    }
+
+    await renameCollection(options.collectionId, options.name)
+    console.log(
+      `Renamed collection ${collection.name} to ${options.name} (${options.collectionId})`,
+    )
   }
 
   get help() {
-    return `Rename a new collection with the provided name and description.
+    return `Rename the collection with the specified id to name
 
 Options
-  --name <name>           Name of the collection
-  --description <desc>    Description of the collection
+  --collection-id | -c <id>       Id of the collection to rename
+  --name | -n <name>              New name to set
 `
   }
 }
