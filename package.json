@@ -8,6 +8,9 @@
   "repository": "https://github.com/YOUR_GITHUB_USER_NAME/@bonadocs/cli",
   "license": "MIT",
   "keywords": [],
+  "bin": {
+    "bonadocs": "build/main/standalone-cli.js"
+  },
   "scripts": {
     "cli": "node build/main/cli.js",
     "build": "run-p build:* && shx cp ./package.json build/main/package.json && shx cp ./package.json build/module/package.json",
