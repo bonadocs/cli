@@ -27,11 +27,14 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
   }
 
   async process(options: DisplayCollectionOptions) {
-    console.log(
-      `Displaying collection ${options.collectionId} using format ${options.format}`,
-    )
+    let collection
+    try {
+      collection = await loadCollectionById(options.collectionId)
+    } catch {
+      console.error(`Collection '${options.collectionId}' not found`)
+      return
+    }
 
-    const collection = await loadCollectionById(options.collectionId)
     switch (options.format) {
       case 'json':
         console.log(JSON.stringify(collection.data, null, 2))
