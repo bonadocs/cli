@@ -1,6 +1,5 @@
-﻿import { RouterCommandProcessor } from '../../router'
-
-import { CommandDescription, CommonOptions } from '#commands'
+﻿import { CommandDescription, CommonOptions } from '#commands'
+import { RouterCommandProcessor } from '#router'
 
 export default class RootCollectionsCommandProcessor extends RouterCommandProcessor<CommonOptions> {
   get options() {

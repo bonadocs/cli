@@ -1,7 +1,8 @@
-﻿import { RouterCommandProcessor } from '../router'
-import { executeWithValue, PromptOption } from '../util'
+﻿import { executeWithValue, PromptOption } from '../util'
 
 import { CommandDescription, CommonOptions } from './types'
+
+import { RouterCommandProcessor } from '#router'
 
 export class EntryCommandProcessor extends RouterCommandProcessor<
   object,
