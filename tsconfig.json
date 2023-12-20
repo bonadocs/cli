@@ -43,6 +43,7 @@
     "typeRoots": ["node_modules/@types", "src/types"],
     "paths": {
       "#commands": ["./src/lib/runner/commands"],
+      "#router": ["./src/lib/runner/router"],
     }
   },
   "include": ["src/**/*.ts"],

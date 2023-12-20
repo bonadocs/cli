@@ -86,7 +86,8 @@
   ],
   "imports": {
     "#commands": "./lib/runner/commands/index.js",
-    "#commands/*": "./lib/runner/commands/*.js"
+    "#commands/*": "./lib/runner/commands/*.js",
+    "#router": "./lib/runner/router/index.js"
   },
   "ava": {
     "failFast": true,
