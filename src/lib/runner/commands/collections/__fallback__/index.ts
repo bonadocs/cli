@@ -15,6 +15,7 @@ export default class RootCollectionCommandProcessor extends RouterCommandProcess
     // set the collection id from the command. [id] in the path is the command name
     contextOptions.collectionId = contextOptions.commandName
   }
+
   get options() {
     return []
   }
