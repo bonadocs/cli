@@ -27,6 +27,11 @@ export async function loadCollectionFromIPFS(uri: string) {
   return collection.manager()
 }
 
+export async function loadCollectionById(id: string) {
+  const collection = await Collection.createFromLocalStore(id)
+  return collection.manager()
+}
+
 export async function renameCollection(id: string, name: string) {
   const store = await getCollectionStore(id)
   const snapshot = await store.get('data')

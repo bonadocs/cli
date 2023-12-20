@@ -1,4 +1,5 @@
-﻿import { PromptOption } from '../../../util'
+﻿import { loadCollectionById } from '../../../../integrations/core'
+import { PromptOption } from '../../../util'
 import { CollectionOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
@@ -29,6 +30,20 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
     console.log(
       `Displaying collection ${options.collectionId} using format ${options.format}`,
     )
+
+    const collection = await loadCollectionById(options.collectionId)
+    switch (options.format) {
+      case 'json':
+        console.log(JSON.stringify(collection.data, null, 2))
+        break
+      case 'json-minified':
+        console.log(JSON.stringify(collection.data))
+        break
+      default:
+        console.error(
+          `Unknown format '${options.format}'. Supported formats are 'json' and 'json-minified'`,
+        )
+    }
   }
 
   protected get commandDescription(): string {
