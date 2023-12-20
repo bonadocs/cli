@@ -150,7 +150,6 @@ export abstract class RouterCommandProcessor<
     if (!moduleName) {
       return null
     }
-    console.log(`Importing command processor from ${moduleName}`)
     return this.tryInstantiateCommandProcessor(moduleName, options)
   }
 
