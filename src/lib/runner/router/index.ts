@@ -79,10 +79,7 @@ export abstract class RouterCommandProcessor<
 
       const command = this.command || ''
 
-      let processor = await this.tryImportCommandProcessor(options)
-      if (!processor) {
-        processor = await this.tryImportDynamicCommandProcessor(options)
-      }
+      const processor = await this.loadCommandProcessor(options)
 
       // When the command is empty and the current command is a router
       if (!processor) {
@@ -129,16 +126,7 @@ export abstract class RouterCommandProcessor<
     )
   }
 
-  private tryImportCommandProcessor(
-    options: RouterCommandProcessorOptions<TParsedOptions>,
-  ) {
-    return this.tryInstantiateCommandProcessor(
-      `#commands/${options.commandStack.join('/')}`,
-      options,
-    )
-  }
-
-  private async tryImportDynamicCommandProcessor(
+  private async loadCommandProcessor(
     options: RouterCommandProcessorOptions<TParsedOptions>,
   ) {
     const root = path.dirname(commandsRootFileName)
@@ -176,6 +164,8 @@ export abstract class RouterCommandProcessor<
       return await this.instantiateCommandProcessor(moduleName, options)
     } catch {
       try {
+        // we have to explicitly add /index because we are using
+        // subpath imports without extensions
         return await this.instantiateCommandProcessor(
           moduleName + '/index',
           options,
