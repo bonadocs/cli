@@ -14,6 +14,18 @@ export abstract class CommandProcessorBase<
   protected constructor(protected readonly contextOptions: TContextOptions) {}
 
   async run(command: string) {
+    try {
+      await this.setup()
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message)
+      } else {
+        console.error(err)
+      }
+      this.printHelp()
+      return
+    }
+
     const options = {
       ...this.contextOptions,
       ...(await this.parseOptions(command)),
@@ -26,6 +38,8 @@ export abstract class CommandProcessorBase<
 
     await this.process(options)
   }
+
+  async setup() {}
 
   get enableExplicitHelp(): boolean {
     return true
@@ -49,7 +63,7 @@ export abstract class CommandProcessorBase<
   }
 
   printHelp() {
-    executeWithValue(this.help, (help) => console.log(help))
+    executeWithValue(this.help, (help) => console.log('\n' + help))
   }
 
   protected abstract get commandDescription(): string
