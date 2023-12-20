@@ -1,11 +1,6 @@
 ﻿import * as path from 'path'
 
-import {
-  executeWithValue,
-  parseOptions,
-  PromptOption,
-  RouterCommandProcessorOptions,
-} from '../util'
+import { executeWithValue, parseOptions, PromptOption } from '../util'
 
 import { findCommandProcessorModule } from './util'
 
@@ -14,6 +9,13 @@ import {
   CommandProcessorBase,
   fileName as commandsRootFileName,
 } from '#commands'
+
+export type RouterCommandProcessorOptions<
+  T extends object = Record<string, never>,
+> = {
+  commandName: string
+  commandStack: string[]
+} & T
 
 export abstract class RouterCommandProcessor<
   TContextOptions extends object | RouterCommandProcessorOptions,

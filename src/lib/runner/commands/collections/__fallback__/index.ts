@@ -1,8 +1,7 @@
-﻿import { RouterCommandProcessorOptions } from '../../../util'
-import { CollectionOptions } from '../types'
+﻿import { CollectionOptions } from '../types'
 
 import { CommandDescription } from '#commands'
-import { RouterCommandProcessor } from '#router'
+import { RouterCommandProcessor, RouterCommandProcessorOptions } from '#router'
 
 export default class RootCollectionCommandProcessor extends RouterCommandProcessor<
   RouterCommandProcessorOptions<CollectionOptions>

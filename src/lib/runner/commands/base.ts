@@ -1,9 +1,6 @@
-﻿import {
-  executeWithValue,
-  parseOptions,
-  PromptOption,
-  RouterCommandProcessorOptions,
-} from '../util'
+﻿import { executeWithValue, parseOptions, PromptOption } from '../util'
+
+import { RouterCommandProcessorOptions } from '#router'
 
 /**
  * A CommandProcessor is expected to be exported as a default export

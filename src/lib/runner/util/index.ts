@@ -4,13 +4,6 @@ import yargs, { Options } from 'yargs'
 type PrimitiveOptionValue = string | number | boolean
 type OptionValue = PrimitiveOptionValue | PrimitiveOptionValue[]
 
-export type RouterCommandProcessorOptions<
-  T extends object = Record<string, never>,
-> = {
-  commandName: string
-  commandStack: string[]
-} & T
-
 export type Choice =
   | string
   | number
