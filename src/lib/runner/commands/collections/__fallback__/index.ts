@@ -1,6 +1,7 @@
 ﻿import { CollectionOptions } from '../types'
 
 import { CommandDescription } from '#commands'
+import { getLocalCollections } from '#integrations/core'
 import { RouterCommandProcessor, RouterCommandProcessorOptions } from '#router'
 
 export default class RootCollectionCommandProcessor extends RouterCommandProcessor<
@@ -10,9 +11,25 @@ export default class RootCollectionCommandProcessor extends RouterCommandProcess
     contextOptions: RouterCommandProcessorOptions<CollectionOptions>,
   ) {
     super(contextOptions)
+  }
 
-    // set the collection id from the command. [id] in the path is the command name
-    contextOptions.collectionId = contextOptions.commandName
+  async setup(): Promise<void> {
+    await super.setup()
+    const localCollections = await getLocalCollections()
+
+    const collection = localCollections.find(
+      (collection) =>
+        collection.id.toLowerCase() ===
+          this.contextOptions.commandName.toLowerCase() ||
+        collection.name
+          .toLowerCase()
+          .includes(this.contextOptions.commandName.toLowerCase()),
+    )
+
+    if (!collection) {
+      throw new Error(`Collection ${this.contextOptions.commandName} not found`)
+    }
+    this.contextOptions.collectionId = collection.id
   }
 
   get options() {
