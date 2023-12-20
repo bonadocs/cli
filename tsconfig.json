@@ -44,6 +44,7 @@
     "paths": {
       "#commands": ["./src/lib/runner/commands"],
       "#router": ["./src/lib/runner/router"],
+      "#integrations/core": ["./src/lib/integrations/core"],
     }
   },
   "include": ["src/**/*.ts"],
