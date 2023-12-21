@@ -1,11 +1,10 @@
-﻿import {
+﻿import { RouterCommandProcessorOptions } from '#router'
+import {
   executeWithValue,
   parseOptions,
   PromptOption,
   promptUserForOptions,
-} from '../util'
-
-import { RouterCommandProcessorOptions } from '#router'
+} from '#util'
 
 /**
  * A CommandProcessor is expected to be exported as a default export
@@ -21,27 +20,27 @@ export abstract class CommandProcessorBase<
   async run(command: string) {
     try {
       await this.setup()
+
+      const options = {
+        ...this.contextOptions,
+        ...(await this.parseOptions(command)),
+      }
+
+      if (this.enableExplicitHelp && 'help' in options && options.help) {
+        this.printHelp()
+        return
+      }
+
+      await this.process(options)
     } catch (err) {
       if (err instanceof Error) {
-        console.error(err.message)
+        executeWithValue(this.help, (help) => {
+          throw new Error(`${(err as Error).message}\n\n${help}`)
+        })
       } else {
-        console.error(err)
+        throw err
       }
-      this.printHelp()
-      return
     }
-
-    const options = {
-      ...this.contextOptions,
-      ...(await this.parseOptions(command)),
-    }
-
-    if (this.enableExplicitHelp && 'help' in options && options.help) {
-      this.printHelp()
-      return
-    }
-
-    await this.process(options)
   }
 
   async setup() {}

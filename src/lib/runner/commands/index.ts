@@ -7,7 +7,7 @@ export const fileName = module.filename
 
 export function runStandalone() {
   runCommand(hideBin(process.argv).join(' ')).catch((error) => {
-    console.error(error)
+    console.error(error.message)
     process.exit(1)
   })
 }
