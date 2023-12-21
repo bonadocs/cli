@@ -1,5 +1,7 @@
-﻿import { CommonOptions } from '../types'
+﻿import { CollectionDataManager } from '@bonadocs/core'
+
+import { CommonOptions } from '../types'
 
 export type CollectionOptions = {
-  collectionId: string
+  collectionDataManager: CollectionDataManager
 } & CommonOptions
