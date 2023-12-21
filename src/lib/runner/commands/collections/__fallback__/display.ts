@@ -1,5 +1,4 @@
-﻿import { loadCollectionById } from '../../../../integrations/core'
-import { PromptOption } from '../../../util'
+﻿import { PromptOption } from '../../../util'
 import { CollectionOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
@@ -27,20 +26,12 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
   }
 
   async process(options: DisplayCollectionOptions) {
-    let collection
-    try {
-      collection = await loadCollectionById(options.collectionId)
-    } catch {
-      console.error(`Collection '${options.collectionId}' not found`)
-      return
-    }
-
     switch (options.format) {
       case 'json':
-        console.log(JSON.stringify(collection.data, null, 2))
+        console.log(JSON.stringify(options.collectionDataManager.data, null, 2))
         break
       case 'json-minified':
-        console.log(JSON.stringify(collection.data))
+        console.log(JSON.stringify(options.collectionDataManager.data))
         break
       default:
         console.error(
