@@ -232,8 +232,7 @@ function validateOptionValues(
 }
 
 function terminateWithValidationErrors(errors: string[]) {
-  console.error(`Command failed with errors:\n${errors.join('\n')}`)
-  process.exit(1)
+  throw new Error(`Command failed with errors:\n${errors.join('\n')}`)
 }
 
 // yargs disables help and loses the help config so we must add it back manually
