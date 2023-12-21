@@ -17,7 +17,12 @@ export type PromptOption = {
   aliases: string[]
   prompt: string
   description?: string
-  required?: boolean
+  /**
+   * If string, it forms a require group with other options with the same value.
+   * At least one option in the group must be provided. The value must be the
+   * name of the primary option in the group.
+   */
+  required?: boolean | string
   choices?: Choice[]
   validationErrorMessage?: string
   validate?: (
@@ -84,14 +89,27 @@ export function parseOptions<T extends object>(
   return options as T
 }
 
-async function promptUserForOptions<T>(
+export async function promptUserForOptions<T>(
   promptOptions: PromptOption[],
   parsedOptions: Record<string, OptionValue>,
 ): Promise<T> {
-  const pendingOptions = []
+  const pendingOptions: PromptOption[] = []
   for (const option of promptOptions) {
     // skip options that have already been provided
     if (parsedOptions[option.name] != null) {
+      continue
+    }
+
+    // skip options that are not required
+    if (!option.required) {
+      continue
+    }
+
+    // skip options in a require group and only prompt for the primary option
+    if (
+      typeof option.required === 'string' &&
+      option.required !== option.name
+    ) {
       continue
     }
 
@@ -113,9 +131,22 @@ function showPrompt(
     message: option.prompt,
     default: option.default,
     choices: option.choices,
-    validate: (value) => {
+    validate: (value, answers) => {
       if (option.required && value == null) {
-        return false
+        if (typeof option.required === 'boolean') {
+          return false
+        }
+
+        if (!answers) {
+          return false
+        }
+
+        const optionsInGroup = options.filter(
+          (o) => o.required === option.required,
+        )
+        if (!optionsInGroup.some((o) => answers[o.name] != null)) {
+          return false
+        }
       }
 
       if (option.validate == null) {
@@ -186,7 +217,11 @@ function validateOptionValues(
   for (const option of options) {
     if (option.required && values[option.name] == null) {
       errors.push(`${option.name} is required`)
-    } else if (option.validate && !option.validate(values[option.name])) {
+    } else if (
+      values[option.name] != null &&
+      option.validate &&
+      !option.validate(values[option.name])
+    ) {
       errors.push(option.validationErrorMessage || `${option.name} is invalid`)
     }
   }
