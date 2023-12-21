@@ -88,6 +88,7 @@
   "imports": {
     "#commands": "./lib/runner/commands/index.js",
     "#commands/*": "./lib/runner/commands/*.js",
+    "#util": "./lib/runner/util/index.js",
     "#router": "./lib/runner/router/index.js",
     "#integrations/core": "./lib/integrations/core/index.js"
   },
