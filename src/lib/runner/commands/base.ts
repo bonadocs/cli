@@ -1,4 +1,9 @@
-﻿import { executeWithValue, parseOptions, PromptOption } from '../util'
+﻿import {
+  executeWithValue,
+  parseOptions,
+  PromptOption,
+  promptUserForOptions,
+} from '../util'
 
 import { RouterCommandProcessorOptions } from '#router'
 
@@ -55,6 +60,20 @@ export abstract class CommandProcessorBase<
     })
   }
 
+  protected async prompt(
+    promptOptions: PromptOption[],
+  ): Promise<Partial<TParsedOptions>> {
+    const isInteractivityDisabled =
+      'disableInteractivity' in this.contextOptions &&
+      this.contextOptions.disableInteractivity === true
+
+    if (isInteractivityDisabled) {
+      return {}
+    }
+
+    return await promptUserForOptions<TParsedOptions>(promptOptions, {})
+  }
+
   protected joinHelpParts(
     parts: Array<string | undefined>,
     separator = '\n\n',
@@ -97,9 +116,11 @@ export abstract class CommandProcessorBase<
     return help
   }
 
-  abstract get options(): PromptOption[] | Promise<PromptOption[]>
+  protected abstract get options(): PromptOption[] | Promise<PromptOption[]>
 
-  parseOptions(command: string): TParsedOptions | Promise<TParsedOptions> {
+  protected parseOptions(
+    command: string,
+  ): TParsedOptions | Promise<TParsedOptions> {
     const isInteractivityDisabled =
       'disableInteractivity' in this.contextOptions &&
       this.contextOptions.disableInteractivity === true
