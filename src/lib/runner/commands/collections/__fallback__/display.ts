@@ -1,7 +1,7 @@
-﻿import { PromptOption } from '../../../util'
-import { CollectionOptions } from '../types'
+﻿import { CollectionOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
+import { PromptOption } from '#util'
 
 type DisplayCollectionOptions = {
   format: string
@@ -34,7 +34,7 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
         console.log(JSON.stringify(options.collectionDataManager.data))
         break
       default:
-        console.error(
+        throw new Error(
           `Unknown format '${options.format}'. Supported formats are 'json' and 'json-minified'`,
         )
     }

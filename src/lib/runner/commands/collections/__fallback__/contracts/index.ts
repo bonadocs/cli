@@ -26,8 +26,8 @@ export default class RootContractCommandProcessor extends RouterCommandProcessor
         description: `Add a contract to collection '${this.contextOptions.collectionDataManager.metadataView.name}'`,
       },
       {
-        name: 'delete',
-        description: `Delete a contract from '${this.contextOptions.collectionDataManager.metadataView.name}'`,
+        name: 'remove',
+        description: `Remove a contract from '${this.contextOptions.collectionDataManager.metadataView.name}'`,
       },
       {
         name: 'rename',

@@ -1,8 +1,8 @@
-﻿import { getLocalCollections } from '../../../integrations/core'
-import { PromptOption } from '../../util'
-import { CommonOptions } from '../types'
+﻿import { CommonOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
+import { getLocalCollections } from '#integrations/core'
+import { PromptOption } from '#util'
 
 export default class ListCollectionsCommandProcessor extends RoutedProcessorBase<CommonOptions> {
   get options(): PromptOption[] {

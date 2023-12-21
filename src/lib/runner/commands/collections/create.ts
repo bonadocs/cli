@@ -1,8 +1,8 @@
-﻿import { createCollection } from '../../../integrations/core'
-import { PromptOption } from '../../util'
-import { CommonOptions } from '../types'
+﻿import { CommonOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
+import { createCollection } from '#integrations/core'
+import { PromptOption } from '#util'
 
 type CreateCollectionOptions = {
   name: string

@@ -1,11 +1,8 @@
-﻿import {
-  getLocalCollections,
-  renameCollection,
-} from '../../../integrations/core'
-import { PromptOption } from '../../util'
-import { CommonOptions } from '../types'
+﻿import { CommonOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
+import { getLocalCollections, renameCollection } from '#integrations/core'
+import { PromptOption } from '#util'
 
 type RenameCollectionOptions = {
   collectionId: string
@@ -62,8 +59,7 @@ export default class RenameCollectionCommandProcessor extends RoutedProcessorBas
       (collection) => collection.id === options.collectionId,
     )
     if (!collection) {
-      console.error('Collection not found')
-      return
+      throw new Error(`Collection ${options.collectionId} not found.`)
     }
 
     await renameCollection(options.collectionId, options.name)

@@ -1,10 +1,10 @@
 ﻿import { getApi, supportedChains } from '@bonadocs/core'
 import { Interface, isAddress } from 'ethers'
 
-import { PromptOption } from '../../../../util'
 import { CollectionOptions } from '../../types'
 
 import { RoutedProcessorBase } from '#commands'
+import { PromptOption } from '#util'
 
 type AddContractOptions = {
   name: string
@@ -96,9 +96,7 @@ export default class AddContractCommandProcessor extends RoutedProcessorBase<
     const interfaceHash = await this.getInterfaceHash(options)
 
     if (!interfaceHash) {
-      console.error('ABI is required')
-      this.printHelp()
-      return
+      throw new Error('ABI is required')
     }
 
     await this.contextOptions.collectionDataManager.contractManagerView.addContract(
