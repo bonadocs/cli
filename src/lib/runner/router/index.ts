@@ -1,7 +1,5 @@
 ﻿import * as path from 'path'
 
-import { executeWithValue, parseOptions, PromptOption } from '../util'
-
 import { findCommandProcessorModule } from './util'
 
 import {
@@ -9,6 +7,7 @@ import {
   CommandProcessorBase,
   fileName as commandsRootFileName,
 } from '#commands'
+import { executeWithValue, parseOptions, PromptOption } from '#util'
 
 export type RouterCommandProcessorOptions<
   T extends object = Record<string, never>,
@@ -150,7 +149,7 @@ export abstract class RouterCommandProcessor<
     const processorModule = await import(moduleName)
     const processor = new processorModule.default(options)
     if (!(processor instanceof CommandProcessorBase)) {
-      console.error(
+      throw new Error(
         `Command processor for ${options.commandName} does not extend CommandProcessorBase`,
       )
       return null
