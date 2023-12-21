@@ -1,23 +1,22 @@
-﻿import {
-  deleteCollection,
-  getLocalCollections,
-} from '../../../integrations/core'
-import { PromptOption } from '../../util'
-import { CommonOptions } from '../types'
-
-import { CollectionOptions } from './types'
+﻿import { CommonOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
+import { deleteCollection, getLocalCollections } from '#integrations/core'
+import { PromptOption } from '#util'
+
+type DeleteCollectionOptions = {
+  collectionId: string
+} & CommonOptions
 
 export default class DeleteCollectionCommandProcessor extends RoutedProcessorBase<
   CommonOptions,
-  CollectionOptions
+  DeleteCollectionOptions
 > {
   get options(): Promise<PromptOption[]> {
     return this.getOptions()
   }
 
-  async process(options: CollectionOptions) {
+  async process(options: DeleteCollectionOptions) {
     await deleteCollection(options.collectionId)
     console.log(`Collection ${options.collectionId} deleted.`)
   }
