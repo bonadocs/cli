@@ -1,8 +1,8 @@
-﻿import { CollectionOptions } from '../../types'
+﻿import { CollectionOptions } from '../types'
 
 import { RouterCommandProcessor, RouterCommandProcessorOptions } from '#router'
 
-export default class RootContractCommandProcessor extends RouterCommandProcessor<
+export default class RootContractsCommandProcessor extends RouterCommandProcessor<
   RouterCommandProcessorOptions<CollectionOptions>
 > {
   constructor(

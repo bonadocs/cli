@@ -1,7 +1,7 @@
 ﻿import { getApi, supportedChains } from '@bonadocs/core'
 import { Interface, isAddress } from 'ethers'
 
-import { CollectionOptions } from '../../types'
+import { CollectionOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
 import { PromptOption } from '#util'

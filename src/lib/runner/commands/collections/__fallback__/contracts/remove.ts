@@ -1,6 +1,6 @@
 ﻿import { ContractDefinition, supportedChains } from '@bonadocs/core'
 
-import { CollectionOptions } from '../../types'
+import { CollectionOptions } from '../types'
 
 import { RoutedProcessorBase } from '#commands'
 import { PromptOption } from '#util'

@@ -1,6 +1,6 @@
 ﻿import { CollectionDataManager } from '@bonadocs/core'
 
-import { CollectionOptions } from '../types'
+import { CollectionOptions } from './types'
 
 import { CommandDescription } from '#commands'
 import {
