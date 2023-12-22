@@ -5,23 +5,23 @@ import { CollectionOptions } from '../../types'
 import { RoutedProcessorBase } from '#commands'
 import { PromptOption } from '#util'
 
-type DeleteContractOptions = {
+type RemoveContractOptions = {
   contractId: string
 } & CollectionOptions
 
-export default class DeleteContractCommandProcessor extends RoutedProcessorBase<
+export default class RemoveContractCommandProcessor extends RoutedProcessorBase<
   CollectionOptions,
-  DeleteContractOptions
+  RemoveContractOptions
 > {
   get options(): PromptOption[] {
     return [
       {
         name: 'contractId',
         aliases: ['c'],
-        prompt: 'Which contract do you want to delete?',
+        prompt: 'Which contract do you want to remove?',
         type: 'string',
         description:
-          'The contract to delete as <contractId>:[chainId]:[address], chainId and address are optional.',
+          'The contract to remove as <contractId>:[chainId]:[address], chainId and address are optional.',
         required: true,
         choices: [
           ...this.contextOptions.collectionDataManager.contractManagerView
@@ -40,7 +40,7 @@ export default class DeleteContractCommandProcessor extends RoutedProcessorBase<
     ]
   }
 
-  async process(options: DeleteContractOptions) {
+  async process(options: RemoveContractOptions) {
     const [contractId, chainId, address] = options.contractId.split(':')
     const contract =
       this.contextOptions.collectionDataManager.contractManagerView.getContract(
@@ -113,6 +113,6 @@ export default class DeleteContractCommandProcessor extends RoutedProcessorBase<
   }
 
   protected get commandDescription(): string {
-    return 'Delete the collection with the provided id.'
+    return 'Remove the collection with the provided id.'
   }
 }
