@@ -72,27 +72,20 @@ export abstract class RouterCommandProcessor<
   }
 
   async process(options: RouterCommandProcessorOptions<TParsedOptions>) {
-    try {
-      if (!options.commandName) {
-        this.printHelp()
-        return
-      }
-
-      const command = this.command || ''
-
-      const processor = await this.loadCommandProcessor(options)
-
-      // When the command is empty and the current command is a router
-      if (!processor) {
-        console.log(`Command '${options.commandName}' not found`)
-        this.printHelp()
-        return
-      }
-
-      return processor.run(command)
-    } catch {
+    if (!options.commandName) {
       this.printHelp()
+      return
     }
+
+    const command = this.command || ''
+
+    const processor = await this.loadCommandProcessor(options)
+
+    // When the command is empty and the current command is a router
+    if (!processor) {
+      throw new Error(`Command '${options.commandName}' not found`)
+    }
+    return processor.run(command)
   }
 
   protected get commandDescription(): string {
@@ -152,7 +145,6 @@ export abstract class RouterCommandProcessor<
       throw new Error(
         `Command processor for ${options.commandName} does not extend CommandProcessorBase`,
       )
-      return null
     }
     return processor
   }
