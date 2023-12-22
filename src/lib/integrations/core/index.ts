@@ -8,6 +8,8 @@
 
 import { CollectionWithId } from './types'
 
+export { CollectionWithId }
+
 export async function getLocalCollections(): Promise<CollectionWithId[]> {
   const collections = await getLocalCollectionNames()
   return Object.entries(collections).map(([id, { name }]) => ({
