@@ -33,10 +33,8 @@ export abstract class CommandProcessorBase<
 
       await this.process(options)
     } catch (err) {
-      if (err instanceof Error) {
-        executeWithValue(this.help, (help) => {
-          throw new Error(`${(err as Error).message}\n\n${help}`)
-        })
+      if (err instanceof Error && !err.message.includes('\n\nHelp:\n')) {
+        throw new Error(`${err.message}\n\nHelp:\n${await this.help}`)
       } else {
         throw err
       }
