@@ -24,6 +24,10 @@ export default class RootCollectionsCommandProcessor extends RouterCommandProces
         name: 'rename',
         description: 'Rename a collection',
       },
+      {
+        name: '[id]',
+        description: 'Manage collection with the specified id or name',
+      },
     ]
   }
 }
