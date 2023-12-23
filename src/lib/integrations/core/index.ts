@@ -1,7 +1,7 @@
 ﻿import {
   Collection,
   CollectionMetadataView,
-  deleteLocalCollectionName,
+  deleteCollectionName,
   getCollectionStore,
   getLocalCollectionNames,
 } from '@bonadocs/core'
@@ -19,19 +19,19 @@ export async function getLocalCollections(): Promise<CollectionWithId[]> {
 }
 
 export async function createCollection(name: string, description: string) {
-  const manager = Collection.createBlankCollection(name, description).manager()
+  const manager = Collection.createBlankCollection(name, description).manager
   await manager.save()
   return manager
 }
 
-export async function loadCollectionFromIPFS(uri: string) {
-  const collection = await Collection.createFromIPFS(uri)
-  return collection.manager()
+export async function loadCollectionFromURI(uri: string) {
+  const collection = await Collection.createFromURI(uri)
+  return collection.manager
 }
 
 export async function loadCollectionById(id: string) {
   const collection = await Collection.createFromLocalStore(id)
-  return collection.manager()
+  return collection.manager
 }
 
 export async function renameCollection(id: string, name: string) {
@@ -41,7 +41,7 @@ export async function renameCollection(id: string, name: string) {
     throw new Error(`Collection ${id} not found`)
   }
 
-  const manager = Collection.createFromSnapshot(snapshot).manager()
+  const manager = Collection.createFromSnapshot(snapshot).manager
   const metadataView = new CollectionMetadataView(manager)
   await metadataView.rename(name)
 }
@@ -49,5 +49,5 @@ export async function renameCollection(id: string, name: string) {
 export async function deleteCollection(id: string) {
   const store = await getCollectionStore(id)
   await store.remove(id)
-  deleteLocalCollectionName(id)
+  deleteCollectionName(id)
 }
