@@ -20,12 +20,13 @@ export async function getLocalCollections(): Promise<CollectionWithId[]> {
 
 export async function createCollection(name: string, description: string) {
   const manager = Collection.createBlankCollection(name, description).manager
-  await manager.save()
+  await manager.saveToLocal()
   return manager
 }
 
 export async function loadCollectionFromURI(uri: string) {
   const collection = await Collection.createFromURI(uri)
+  await collection.manager.saveToLocal()
   return collection.manager
 }
 
