@@ -45,6 +45,7 @@
       "#commands": ["./src/lib/runner/commands"],
       "#router": ["./src/lib/runner/router"],
       "#integrations/core": ["./src/lib/integrations/core"],
+      "#integrations/registry": ["./src/lib/integrations/registry"],
       "#util": ["./src/lib/runner/util"],
     }
   },
