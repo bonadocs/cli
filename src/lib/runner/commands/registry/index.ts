@@ -16,7 +16,7 @@ export default class RootRegistryCommandProcessor extends RouterCommandProcessor
   protected get commands(): CommandDescription[] {
     return [
       {
-        name: 'register',
+        name: 'add',
         description: 'Register a protocol from a local collection',
       },
       {
