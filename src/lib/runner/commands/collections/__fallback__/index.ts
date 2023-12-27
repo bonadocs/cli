@@ -43,6 +43,10 @@ export default class RootCollectionCommandProcessor extends RouterCommandProcess
         name: 'display',
         description: 'Display this collection',
       },
+      {
+        name: 'widget',
+        description: 'Generate a widget from this collection',
+      },
     ]
   }
 
