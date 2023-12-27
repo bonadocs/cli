@@ -41,6 +41,6 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
   }
 
   protected get commandDescription(): string {
-    return 'Create a new collection with the provided name and description.'
+    return 'Display this collection.'
   }
 }
