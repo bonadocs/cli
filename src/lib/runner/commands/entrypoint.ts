@@ -49,6 +49,10 @@ Usage: bonadocs <command> [options]
         name: 'collections',
         description: 'Manage collections',
       },
+      {
+        name: 'registry',
+        description: 'Access the Protocol Registry',
+      },
     ]
   }
 }
