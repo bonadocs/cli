@@ -8,24 +8,27 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
   }
 
   async process() {
-    const activeNetworks = new Set<number>([0])
-    const functions = [await this.promptForContractFunction(activeNetworks)]
-    while ((await this.promptForAdditionalFunction()) && activeNetworks.size) {
-      functions.push(await this.promptForContractFunction(activeNetworks))
+    const functions = [await this.promptForContractFunction()]
+    while (await this.promptForAdditionalFunction()) {
+      functions.push(await this.promptForContractFunction())
       console.log('Added function')
     }
 
-    if (!activeNetworks.size) {
-      throw new Error('No common networks between selected contracts')
-    }
     console.log('Generating widget')
+    const widgetURI =
+      await this.contextOptions.collectionDataManager!.contractManagerView.generateWidget(
+        functions,
+      )
+
+    console.log('Widget generated\n')
+    console.log('Widget URI: ', widgetURI)
+    console.log('\n\nIn your markdown, add the following:\n\n')
+    console.log(`<BonadocsWidget widgetConfigUri="${widgetURI}" />`)
   }
 
   protected get commandDescription(): string {
     return 'Generate a widget from this collection.'
   }
-
-  private async generateWidget(functions: string[]) {}
 
   private async promptForAdditionalFunction(): Promise<boolean> {
     const answer = (await this.prompt([
@@ -40,9 +43,7 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
     return answer.add
   }
 
-  private async promptForContractFunction(
-    activeNetworks: Set<number>,
-  ): Promise<string> {
+  private async promptForContractFunction(): Promise<string> {
     const contractAnswer = (await this.prompt([
       {
         name: 'contract',
@@ -70,14 +71,6 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
       throw new Error(`Contract '${contractAnswer.contract}' not found`)
     }
 
-    const chainIds = contract.instances.map((instance) => instance.chainId)
-    if (activeNetworks.has(0)) {
-      activeNetworks.delete(0)
-      addAll(activeNetworks, chainIds)
-    } else {
-      intersect(activeNetworks, chainIds)
-    }
-
     const functionAnswer = (await this.prompt([
       {
         name: 'func',
@@ -100,22 +93,5 @@ export default class DisplayCollectionCommandProcessor extends RoutedProcessorBa
       throw new Error('Function is required')
     }
     return functionAnswer.func
-  }
-}
-
-function intersect(a: Set<number>, b: number[]) {
-  const intersection = new Set(b.filter((value) => a.has(value)))
-
-  // remove from a if not in intersection
-  for (const value of a) {
-    if (!intersection.has(value)) {
-      a.delete(value)
-    }
-  }
-}
-
-function addAll(a: Set<number>, b: number[]) {
-  for (const value of b) {
-    a.add(value)
   }
 }
