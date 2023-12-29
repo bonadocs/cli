@@ -24,8 +24,8 @@ export default class RootContractCommandProcessor extends RouterCommandProcessor
   protected get commands(): CommandDescription[] {
     return [
       {
-        name: 'instances',
-        description: 'List the instances of this contract across all chains',
+        name: 'deployments',
+        description: 'List the deployments of this contract across all chains',
       },
       {
         name: 'functions',
