@@ -45,11 +45,7 @@ export default class RootContractCommandProcessor extends RouterCommandProcessor
       },
       {
         name: 'run',
-        description: 'Run a function in this contract',
-      },
-      {
-        name: 'simulate',
-        description: 'Simulate a function in this contract',
+        description: 'Run or simulate a function in this contract',
       },
     ]
   }
