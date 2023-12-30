@@ -10,12 +10,16 @@ export default class PrintABICommandProcessor extends RoutedProcessorBase<Contra
   async process() {
     const contractManagerView =
       this.contextOptions.collectionDataManager.contractManagerView
-    const contract = contractManagerView.getContractInterface(
+    const contractInterface = contractManagerView.getContractInterface(
       this.contextOptions.contract.interfaceHash,
     )
 
+    if (!contractInterface) {
+      throw new Error(`Contract interface not found`)
+    }
+
     console.log('ABI:')
-    console.log(contract.abi)
+    console.log(contractInterface.abi)
   }
 
   protected get commandDescription(): string {
