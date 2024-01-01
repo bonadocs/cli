@@ -193,6 +193,19 @@ export default class RunFunctionCommandProcessor extends RoutedProcessorBase<
     const result = results[0]
 
     console.log('Result:')
+    if (
+      result instanceof TransactionReceiptWithParsedLogs &&
+      !options.verbose
+    ) {
+      const { from, to, hash, gasUsed, logs } = result.simpleData
+      console.log(`  From: ${from}`)
+      console.log(`  To: ${to}`)
+      console.log(`  Transaction hash: ${hash}`)
+      console.log(`  Gas used: ${gasUsed}`)
+      console.log(`  Logs: ${JSON.stringify(logs, null, 2)}`)
+      return
+    }
+
     console.log(JSON.stringify(result, null, 2))
     /* await this.contextOptions.collectionDataManager.dropFunctionFragmentView(
       this.contextOptions.contract.id,
