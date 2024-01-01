@@ -14,8 +14,8 @@ export type Choice =
 
 export type PromptOption = {
   name: string
-  aliases: string[]
-  prompt: string
+  aliases?: string[]
+  prompt?: string
   description?: string
   /**
    * If string, it forms a require group with other options with the same value.
