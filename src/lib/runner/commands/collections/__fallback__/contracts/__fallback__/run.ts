@@ -3,6 +3,7 @@
   Executor,
   FunctionFragmentView,
   supportedChains,
+  TransactionReceiptWithParsedLogs,
 } from '@bonadocs/core'
 import { isAddress, isHexString, toBigInt } from 'ethers'
 
@@ -11,15 +12,20 @@ import { ContractOptions } from './types'
 import { RoutedProcessorBase } from '#commands'
 import { PromptOption } from '#util'
 
-type SimulateFunctionOptions = {
+type RunFunctionOptions = {
   function: string
   chainId: number
   executeOnMainnet: boolean
+  verbose: boolean
+  from?: string
+  gas?: number
+  gasPrice?: number
+  value?: number
 } & ContractOptions
 
-export default class SimulateFunctionCommandProcessor extends RoutedProcessorBase<
+export default class RunFunctionCommandProcessor extends RoutedProcessorBase<
   ContractOptions,
-  SimulateFunctionOptions
+  RunFunctionOptions
 > {
   #view: ContractDetailsView | undefined
 
@@ -74,13 +80,70 @@ export default class SimulateFunctionCommandProcessor extends RoutedProcessorBas
         required: true,
         description:
           'Whether to execute the function on mainnet or simulate it',
-        prompt: 'Execute on mainnet?',
         default: false,
+      },
+      {
+        name: 'verbose',
+        aliases: ['m'],
+        type: 'boolean',
+        required: true,
+        description: 'Whether to display verbose output',
+        default: false,
+      },
+      {
+        name: 'from',
+        aliases: ['F'],
+        type: 'string',
+        description: 'The address to execute the function from',
+        prompt: 'Enter the address to execute the function from:',
+        validate: (value) => isAddress(value),
+      },
+      {
+        name: 'gas',
+        aliases: ['g'],
+        type: 'string',
+        description: 'The gas limit to use',
+        prompt: 'Enter the gas limit to use:',
+        validate: (value) => {
+          try {
+            return toBigInt(value as string) > 0
+          } catch {
+            return false
+          }
+        },
+      },
+      {
+        name: 'gasPrice',
+        aliases: ['p'],
+        type: 'number',
+        description: 'The gas price to use',
+        prompt: 'Enter the gas price to use:',
+        validate: (value) => {
+          try {
+            return toBigInt(value as string) > 0
+          } catch {
+            return false
+          }
+        },
+      },
+      {
+        name: 'value',
+        aliases: ['v'],
+        type: 'string',
+        description: 'The value to send',
+        prompt: 'Enter the value to send:',
+        validate: (value) => {
+          try {
+            return toBigInt(value as string) > 0
+          } catch {
+            return false
+          }
+        },
       },
     ]
   }
 
-  async process(options: SimulateFunctionOptions): Promise<void> {
+  async process(options: RunFunctionOptions): Promise<void> {
     const fn = this.#view!.getFunctionFragment(options.function)
     if (!fn) {
       throw new Error(`Function ${options.function} not found`)
@@ -111,6 +174,15 @@ export default class SimulateFunctionCommandProcessor extends RoutedProcessorBas
         fragmentView: functionFragmentView,
         context: {
           variableMapping: {},
+          overrides: {
+            value: options.value,
+            from: options.from,
+            gasLimit: options.gas,
+            gasPrice: options.gasPrice,
+          },
+          simulationOverrides: {
+            accounts: [],
+          },
         },
       },
     ])
