@@ -93,6 +93,13 @@ export default class RootContractCommandProcessor extends RouterCommandProcessor
     if (filteredContracts.length === 1) {
       return filteredContracts[0]
     }
+
+    const match = filteredContracts.find(
+      (f) => f.name.toLowerCase() === commandName.toLowerCase(),
+    )
+    if (match) {
+      return match
+    }
     return this.promptForContractId(filteredContracts)
   }
 
@@ -111,6 +118,7 @@ export default class RootContractCommandProcessor extends RouterCommandProcessor
         type: 'string',
         prompt: 'Which contract do you want to manage?',
         choices: contractChoices,
+        required: true,
       },
     ])) as { contractId?: string }
 
