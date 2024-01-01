@@ -24,6 +24,7 @@ export type PromptOption = {
    */
   required?: boolean | string
   choices?: Choice[]
+  skipChoicesInYargs?: boolean
   validationErrorMessage?: string
   validate?: (
     value: string | number | boolean | PrimitiveOptionValue[],
@@ -62,9 +63,11 @@ export function parseOptions<T extends object>(
             description: option.description,
             type: option.type,
             default: option.default,
-            choices: option.choices?.map((c) =>
-              typeof c === 'string' || typeof c === 'number' ? c : c.value,
-            ),
+            choices: !option.skipChoicesInYargs
+              ? option.choices?.map((c) =>
+                  typeof c === 'string' || typeof c === 'number' ? c : c.value,
+                )
+              : undefined,
           }
           return options
         },

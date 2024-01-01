@@ -54,6 +54,7 @@ export default class RunFunctionCommandProcessor extends RoutedProcessorBase<
           name: fn.fragment.format('full'),
           value: fn.fragment.format('sighash'),
         })),
+        skipChoicesInYargs: true,
       },
       {
         name: 'chainId',
