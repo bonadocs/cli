@@ -50,5 +50,5 @@ export async function renameCollection(id: string, name: string) {
 export async function deleteCollection(id: string) {
   const store = await getCollectionStore(id)
   await store.remove(id)
-  deleteCollectionName(id)
+  await deleteCollectionName(id)
 }
