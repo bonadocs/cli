@@ -18,6 +18,6 @@ export default class ListContractsCommandProcessor extends RoutedProcessorBase<C
   }
 
   protected get commandDescription(): string {
-    return 'List all collections on this device'
+    return `List all contracts in collection '${this.contextOptions.collectionDataManager.metadataView.name}'`
   }
 }

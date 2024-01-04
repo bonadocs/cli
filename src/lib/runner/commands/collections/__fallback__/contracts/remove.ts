@@ -113,6 +113,6 @@ export default class RemoveContractCommandProcessor extends RoutedProcessorBase<
   }
 
   protected get commandDescription(): string {
-    return 'Remove the collection with the provided id.'
+    return `Remove a contract from collection '${this.contextOptions.collectionDataManager.metadataView.name}'`
   }
 }

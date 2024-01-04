@@ -53,7 +53,7 @@ export default class RenameContractCommandProcessor extends RoutedProcessorBase<
     }
 
     const oldName = contract.name
-    this.contextOptions.collectionDataManager.contractManagerView.renameContract(
+    await this.contextOptions.collectionDataManager.contractManagerView.renameContract(
       contract.id,
       options.name,
     )
@@ -61,6 +61,6 @@ export default class RenameContractCommandProcessor extends RoutedProcessorBase<
   }
 
   protected get commandDescription(): string {
-    return 'Rename the collection with the provided id.'
+    return `Rename a contract in collection '${this.contextOptions.collectionDataManager.metadataView.name}'`
   }
 }
