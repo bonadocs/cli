@@ -1,97 +1,106 @@
 ﻿import { CollectionOptions } from './types'
 
 import { RoutedProcessorBase } from '#commands'
+import { PromptOption } from '#util'
 
-export default class DisplayCollectionCommandProcessor extends RoutedProcessorBase<CollectionOptions> {
-  get options() {
-    return []
+type WidgetOptions = {
+  workflowId?: string
+  printAll?: boolean
+} & CollectionOptions
+
+export default class WidgetCommandProcessor extends RoutedProcessorBase<
+  CollectionOptions,
+  WidgetOptions
+> {
+  get options(): PromptOption[] {
+    return [
+      {
+        name: 'workflowId',
+        aliases: ['w'],
+        prompt: 'Workflow ID:',
+        type: 'string',
+        choices: [
+          ...this.contextOptions.collectionDataManager!.workflowManagerView
+            .workflows,
+        ].map((w) => ({
+          name: w.name,
+          value: w.id,
+        })),
+      },
+      {
+        name: 'printAll',
+        aliases: ['a'],
+        prompt: 'Print all widget config?',
+        type: 'boolean',
+        default: false,
+      },
+    ]
   }
 
-  async process() {
-    const functions = [await this.promptForContractFunction()]
-    while (await this.promptForAdditionalFunction()) {
-      functions.push(await this.promptForContractFunction())
-      console.log('Added function')
-    }
-
+  async process(options: WidgetOptions) {
     console.log('Generating widget')
     const widgetURI =
-      await this.contextOptions.collectionDataManager!.contractManagerView.generateWidget(
-        functions,
+      await this.contextOptions.collectionDataManager!.workflowManagerView.generateWidget(
+        options.workflowId,
       )
 
     console.log('Widget generated\n')
     console.log('Widget URI: ', widgetURI)
     console.log('\n\nIn your markdown, add the following:\n\n')
-    console.log(`<BonadocsWidget widgetConfigUri="${widgetURI}" />`)
+
+    if (options.workflowId) {
+      console.log(`<BonadocsWidget widgetConfigUri="${widgetURI}" />`)
+      return
+    }
+
+    if (!options.printAll) {
+      this.printInstructions(widgetURI)
+      return
+    }
+
+    this.printAllWidgetConfig(widgetURI)
   }
 
   protected get commandDescription(): string {
-    return 'Generate a widget from this collection.'
+    return 'Generate a widget from this collection.\nUse -w to specify a workflow ID to generate.\nAn open-ended widget will be generated if no workflow is specified.'
   }
 
-  private async promptForAdditionalFunction(): Promise<boolean> {
-    const answer = (await this.prompt([
-      {
-        name: 'add',
-        aliases: ['a'],
-        prompt: 'Add another function?',
-        type: 'boolean',
-        required: true,
-      },
-    ])) as { add: boolean }
-    return answer.add
+  private printInstructions(widgetURI: string) {
+    console.log(
+      `<BonadocsWidget widgetConfigUri="${widgetURI}" contract="ContractNameHere" functionKey="selectorOrSignatureHere" />`,
+    )
+    console.log('\n\nNOTE:')
+    console.log(
+      '1. The contract name must be the name or ID of a contract in this collection.',
+    )
+    console.log(
+      '2. The function key must be the selector or signature of a function in that contract.',
+    )
+    console.log(
+      `3. You can get a list of contracts by running 'bonadocs collections ${this.contextOptions.collectionDataManager.id} contracts list'`,
+    )
+    console.log(
+      `4. You can get a list of functions in a contract by running 'bonadocs collections ${this.contextOptions.collectionDataManager.id} contracts ContractName functions'`,
+    )
   }
 
-  private async promptForContractFunction(): Promise<string> {
-    const contractAnswer = (await this.prompt([
-      {
-        name: 'contract',
-        aliases: ['c'],
-        prompt: 'Choose Contract:',
-        type: 'string',
-        required: true,
-        choices: [
-          ...this.contextOptions.collectionDataManager!.contractManagerView
-            .contracts,
-        ].map((contract) => ({
-          name: contract.name,
-          value: contract.id,
-        })),
-      },
-    ])) as { contract: string }
-    if (!contractAnswer.contract) {
-      throw new Error('Contract is required')
-    }
-    const contract =
-      this.contextOptions.collectionDataManager!.contractManagerView.getContract(
-        contractAnswer.contract,
-      )
-    if (!contract) {
-      throw new Error(`Contract '${contractAnswer.contract}' not found`)
-    }
+  private printAllWidgetConfig(widgetURI: string) {
+    for (const contract of this.contextOptions.collectionDataManager
+      .contractManagerView.contracts) {
+      const iface =
+        this.contextOptions.collectionDataManager.contractManagerView.getInterface(
+          contract.interfaceHash,
+        )!
 
-    const functionAnswer = (await this.prompt([
-      {
-        name: 'func',
-        aliases: ['f'],
-        prompt: 'Choose Function:',
-        type: 'string',
-        required: true,
-        choices: [
-          ...this.contextOptions.collectionDataManager.getContractDetailsView(
-            contract.id,
-          ).functions,
-        ].map((func) => ({
-          name: func.signature,
-          value: func.fragmentKey,
-        })),
-      },
-    ])) as { func: string }
-
-    if (!functionAnswer.func) {
-      throw new Error('Function is required')
+      iface.forEachFunction((fn) => {
+        console.log(
+          `${contract.name}.${fn.format(
+            'sighash',
+          )}: <BonadocsWidget widgetConfigUri="${widgetURI}" contract="${
+            contract.id
+          }" functionKey="${fn.selector}" />\n`,
+        )
+      })
     }
-    return functionAnswer.func
   }
 }
