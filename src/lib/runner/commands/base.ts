@@ -103,7 +103,7 @@ export abstract class CommandProcessorBase<
     if (options.length) {
       help += 'Options:\n'
       for (const option of options) {
-        const aliases = option.aliases.length
+        const aliases = option.aliases?.length
           ? `-${option.aliases.join(', ')}`
           : ''
         help += `  --${option.name}, ${aliases}  ${option.description}\n`
