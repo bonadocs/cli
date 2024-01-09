@@ -1,4 +1,9 @@
-﻿import { CollectionOptions } from './types'
+﻿import * as path from 'path'
+
+import { FunctionFragment } from 'ethers'
+import { glob } from 'glob'
+
+import { CollectionOptions } from './types'
 
 import { RoutedProcessorBase } from '#commands'
 import { PromptOption } from '#util'
@@ -6,6 +11,8 @@ import { PromptOption } from '#util'
 type WidgetOptions = {
   workflowId?: string
   printAll?: boolean
+  file?: string
+  edit: boolean
 } & CollectionOptions
 
 export default class WidgetCommandProcessor extends RoutedProcessorBase<
@@ -34,6 +41,20 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
         type: 'boolean',
         default: false,
       },
+      {
+        name: 'file',
+        aliases: ['f'],
+        prompt:
+          'Markdown file to update - glob syntax supported for multiple files:',
+        type: 'string',
+      },
+      {
+        name: 'edit',
+        aliases: ['e'],
+        prompt: 'Edit file in place? (This will not create backup files)',
+        type: 'boolean',
+        default: false,
+      },
     ]
   }
 
@@ -46,19 +67,26 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
 
     console.log('Widget generated\n')
     console.log('Widget URI: ', widgetURI)
-    console.log('\n\nIn your markdown, add the following:\n\n')
 
     if (options.workflowId) {
+      console.log('\n\nIn your markdown, add the following:\n\n')
       console.log(`<BonadocsWidget widgetConfigUri="${widgetURI}" />`)
       return
     }
 
-    if (!options.printAll) {
-      this.printInstructions(widgetURI)
+    if (options.printAll) {
+      this.printAllWidgetConfig(widgetURI)
       return
     }
 
-    this.printAllWidgetConfig(widgetURI)
+    if (options.file) {
+      await this.processFile(options.file, widgetURI, options.edit)
+      console.log('Widget added to markdown files')
+      return
+    }
+
+    this.printInstructions(widgetURI)
+    return
   }
 
   protected get commandDescription(): string {
@@ -85,6 +113,7 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
   }
 
   private printAllWidgetConfig(widgetURI: string) {
+    console.log('\n\nIn your markdown, add the following as needed:\n\n')
     for (const contract of this.contextOptions.collectionDataManager
       .contractManagerView.contracts) {
       const iface =
@@ -102,5 +131,169 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
         )
       })
     }
+  }
+
+  private async processFile(file: string, widgetURI: string, edit: boolean) {
+    const functionsContracts = this.getFunctionsContracts()
+    const files = await glob(file)
+    if (!files.length) {
+      console.log('No files found matching glob pattern')
+      return
+    }
+
+    const commonRoot = await this.getCommonRoot(files)
+    await Promise.all(
+      files.map((f) =>
+        this.addWidgetToMarkdownFile(
+          commonRoot,
+          f,
+          widgetURI,
+          functionsContracts,
+          edit,
+        ),
+      ),
+    )
+  }
+
+  private async addWidgetToMarkdownFile(
+    commonRoot: string,
+    file: string,
+    widgetURI: string,
+    functionContracts: Map<string, string[]>,
+    edit: boolean,
+  ) {
+    const fs = await import('fs/promises')
+
+    const contents = await this.getFileContentsWithWidgetInserted(
+      widgetURI,
+      path.relative(commonRoot, file),
+      await fs.readFile(file, 'utf-8'),
+      functionContracts,
+    )
+
+    const fileExtension = path.extname(file)
+    const fileName =
+      path.basename(file, fileExtension) + (edit ? '' : '-bonadocs')
+    await fs.writeFile(
+      path.join(path.dirname(file), fileName + fileExtension),
+      contents.trim() + '\n',
+    )
+  }
+
+  private getFunctionsContracts(): Map<string, string[]> {
+    const result = new Map<string, string[]>()
+    for (const contract of this.contextOptions.collectionDataManager
+      .contractManagerView.contracts) {
+      const iface =
+        this.contextOptions.collectionDataManager.contractManagerView.getInterface(
+          contract.interfaceHash,
+        )!
+
+      iface.forEachFunction((fn) => {
+        const functionKey = fn.format('sighash')
+        if (!result.has(functionKey)) {
+          result.set(functionKey, [])
+        }
+        result.get(functionKey)!.push(contract.name)
+      })
+    }
+    return result
+  }
+
+  private async getFileContentsWithWidgetInserted(
+    widgetURI: string,
+    file: string,
+    content: string,
+    functionsContracts: Map<string, string[]>,
+  ): Promise<string> {
+    let newContent = ''
+    const lines = content.split('\n')
+    let isCodeBlock = false
+    let currentCodeBlock = ''
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (line.trim().startsWith('```')) {
+        isCodeBlock = !isCodeBlock
+      }
+
+      if (isCodeBlock) {
+        currentCodeBlock += line + '\n'
+        continue
+      } else if (currentCodeBlock) {
+        try {
+          const functionKey = this.getFunctionKey(currentCodeBlock)!
+          const contracts = functionsContracts.get(functionKey)!
+          const fileNameWithoutExtension = path.basename(
+            file,
+            path.extname(file),
+          )
+          const contract =
+            contracts.length === 1
+              ? contracts[0]
+              : contracts.find(
+                  (c) =>
+                    c.toLowerCase() === fileNameWithoutExtension.toLowerCase(),
+                ) ||
+                (await this.promptForContract(functionKey, file, i, contracts))
+          const widgetTag = `<BonadocsWidget widgetConfigUri="${widgetURI}" contract="${contract}" functionKey="${functionKey}" />`
+          newContent += '\n' + widgetTag + '\n'
+        } catch {
+          newContent += currentCodeBlock + line + '\n'
+        } finally {
+          currentCodeBlock = ''
+        }
+        continue
+      }
+
+      newContent += line + '\n'
+    }
+    return newContent
+  }
+
+  private getFunctionKey(codeBlock: string): string | undefined {
+    try {
+      // trim language section
+      codeBlock = codeBlock.split('\n').slice(1).join(' ').trim()
+      const fragment = FunctionFragment.from(codeBlock)
+      return fragment.format('sighash')
+    } catch {
+      return undefined
+    }
+  }
+
+  private async promptForContract(
+    functionKey: string,
+    file: string,
+    line: number,
+    contracts: string[],
+  ): Promise<string> {
+    const answer = (await this.prompt([
+      {
+        name: 'contract',
+        prompt: `Contract for function ${functionKey} on line ${line} of ${file}:`,
+        type: 'string',
+        choices: contracts.map((c) => ({
+          name: c,
+          value: c,
+        })),
+        required: true,
+      },
+    ])) as { contract?: string }
+
+    if (!answer.contract) {
+      throw new Error('Contract is required')
+    }
+    return answer.contract
+  }
+
+  private async getCommonRoot(files: string[]): Promise<string> {
+    let commonRoot = path.dirname(files[0])
+    for (const file of files) {
+      const dir = path.dirname(file)
+      while (!dir.startsWith(commonRoot)) {
+        commonRoot = path.dirname(commonRoot)
+      }
+    }
+    return commonRoot
   }
 }
