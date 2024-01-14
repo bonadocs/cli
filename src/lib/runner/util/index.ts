@@ -247,3 +247,10 @@ function fixHelp(options: Record<string, OptionValue>) {
     options.h = false
   }
 }
+
+export function indent(s: string, spaces = 2) {
+  return s
+    .split('\n')
+    .map((l) => `${' '.repeat(spaces)}${l}`)
+    .join('\n')
+}

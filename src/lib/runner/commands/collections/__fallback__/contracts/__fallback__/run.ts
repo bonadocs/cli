@@ -1,16 +1,16 @@
 ﻿import {
   ContractDetailsView,
-  Executor,
+  ExecutionResult,
+  FunctionExecutor,
   FunctionFragmentView,
   supportedChains,
-  TransactionReceiptWithParsedLogs,
 } from '@bonadocs/core'
 import { isAddress, isHexString, toBigInt } from 'ethers'
 
 import { ContractOptions } from './types'
 
 import { RoutedProcessorBase } from '#commands'
-import { PromptOption } from '#util'
+import { indent, PromptOption } from '#util'
 
 type RunFunctionOptions = {
   function: string
@@ -85,7 +85,7 @@ export default class RunFunctionCommandProcessor extends RoutedProcessorBase<
       },
       {
         name: 'verbose',
-        aliases: ['m'],
+        aliases: ['v'],
         type: 'boolean',
         required: true,
         description: 'Whether to display verbose output',
@@ -129,7 +129,6 @@ export default class RunFunctionCommandProcessor extends RoutedProcessorBase<
       },
       {
         name: 'value',
-        aliases: ['v'],
         type: 'string',
         description: 'The value to send',
         prompt: 'Enter the value to send:',
@@ -150,68 +149,32 @@ export default class RunFunctionCommandProcessor extends RoutedProcessorBase<
       throw new Error(`Function ${options.function} not found`)
     }
 
-    const functionFragmentView =
-      await this.contextOptions.collectionDataManager.getFunctionFragmentView(
-        this.contextOptions.contract.id,
-        fn.fragmentKey,
-      )
-    if (!functionFragmentView) {
-      throw new Error(`Failed to load function fragment view`)
-    }
+    const executor = await FunctionExecutor.createFunctionExecutor(
+      this.contextOptions.collectionDataManager,
+      [fn.fragmentKey],
+    )
+    executor.setActiveChainId(options.chainId)
 
-    await this.promptForArgs(functionFragmentView)
-
-    const contractAddress = this.contextOptions.contract.instances.find(
-      (i) => i.chainId === options.chainId,
-    )?.address
-    if (!contractAddress) {
-      throw new Error(`Contract not deployed on chain ${options.chainId}`)
-    }
-
-    const executor = new Executor(options.chainId, [
-      {
-        contractInterface: this.#view!.contractInterface,
-        address: contractAddress,
-        fragmentView: functionFragmentView,
-        context: {
-          variableMapping: {},
-          overrides: {
-            value: options.value,
-            from: options.from,
-            gasLimit: options.gas,
-            gasPrice: options.gasPrice,
-          },
-          simulationOverrides: {
-            accounts: [],
-          },
-        },
-      },
-    ])
-
+    await this.promptForArgs(executor.functionViews[0])
     const results = options.executeOnMainnet
       ? await executor.execute()
       : await executor.simulate()
     const result = results[0]
 
     console.log('Result:')
-    if (
-      result instanceof TransactionReceiptWithParsedLogs &&
-      !options.verbose
-    ) {
-      const { from, to, hash, gasUsed, logs } = result.simpleData
-      console.log(`  From: ${from}`)
-      console.log(`  To: ${to}`)
-      console.log(`  Transaction hash: ${hash}`)
-      console.log(`  Gas used: ${gasUsed}`)
-      console.log(`  Logs: ${JSON.stringify(logs, null, 2)}`)
+    if (result instanceof ExecutionResult && !options.verbose) {
+      const { from, to, hash, gasUsed, logs, error } = result.simpleData
+      console.log(indent(`From: ${from}`))
+      console.log(indent(`To: ${to}`))
+      console.log(indent(`Transaction hash: ${hash}`))
+      console.log(indent(`Gas used: ${gasUsed}`))
+      console.log(indent(`Logs: ${JSON.stringify(logs, null, 2)}`))
+      console.log(indent(`Error: ${JSON.stringify(error, null, 2)}`))
       return
     }
 
     console.log(JSON.stringify(result, null, 2))
-    /* await this.contextOptions.collectionDataManager.dropFunctionFragmentView(
-      this.contextOptions.contract.id,
-      fn.fragmentKey,
-    ) */
+    await executor.clearFunctionViews()
   }
 
   protected get commandDescription(): string {
