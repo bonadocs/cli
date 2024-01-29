@@ -164,12 +164,20 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
   ) {
     const fs = await import('fs/promises')
 
+    const existingContents = await fs.readFile(file, 'utf-8')
     const contents = await this.getFileContentsWithWidgetInserted(
       widgetURI,
       path.relative(commonRoot, file),
-      await fs.readFile(file, 'utf-8'),
+      existingContents,
       functionContracts,
     )
+
+    if (
+      !contents.includes('<BonadocsWidget') ||
+      contents.replace(/\s+/g, '') === existingContents.replace(/\s+/g, '')
+    ) {
+      return
+    }
 
     const fileExtension = path.extname(file)
     const fileName =
