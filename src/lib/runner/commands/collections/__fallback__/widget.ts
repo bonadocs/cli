@@ -135,7 +135,7 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
 
   private async processFile(file: string, widgetURI: string, edit: boolean) {
     const functionsContracts = this.getFunctionsContracts()
-    const files = await glob(file)
+    const files = await glob(file, { nodir: true, dot: true })
     if (!files.length) {
       console.log('No files found matching glob pattern')
       return
