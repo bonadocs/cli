@@ -14,7 +14,6 @@ export function runStandalone() {
 }
 
 export async function runCommand(command: string) {
-  // dynamic import is used to avoid circular dependencies
   const { EntryCommandProcessor } = await import('./entrypoint')
   const processor = new EntryCommandProcessor()
   await processor.run(command)
