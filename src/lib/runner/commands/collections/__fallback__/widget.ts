@@ -253,7 +253,14 @@ export default class WidgetCommandProcessor extends RoutedProcessorBase<
   private getFunctionKey(codeBlock: string): string | undefined {
     try {
       // trim language section
-      codeBlock = codeBlock.split('\n').slice(1).join(' ').trim()
+      codeBlock = codeBlock
+        .split('\n')
+        .slice(1)
+        .join(' ')
+        .replace('override', '')
+        .replace(/\s+/g, ' ')
+        .replace(/;\s*$/, '')
+        .trim()
       const fragment = FunctionFragment.from(codeBlock)
       return fragment.format('sighash')
     } catch {
