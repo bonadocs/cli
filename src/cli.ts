@@ -1,3 +1,4 @@
-﻿import { runStandalone } from '#commands'
+﻿#!/usr/bin/env node
+import { runStandalone } from '#commands'
 
 runStandalone()

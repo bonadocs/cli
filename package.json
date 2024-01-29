@@ -9,7 +9,7 @@
   "license": "MIT",
   "keywords": [],
   "bin": {
-    "bonadocs": "build/main/standalone-cli.js"
+    "bonadocs": "build/main/cli.js"
   },
   "scripts": {
     "cli": "node build/main/cli.js",
