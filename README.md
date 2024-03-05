@@ -6,7 +6,7 @@ protocol registry. For a GUI interface, check out our editor at [bonadocs.com](h
 ## Installation
 
 ```bash
-npm install -g @bonadocs/cli
+npm i @bonadocs/docgen
 ```
 
 ## Quick Usage Guide
