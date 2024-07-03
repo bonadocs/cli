@@ -1,6 +1,6 @@
 {
   "name": "@bonadocs/cli",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.3",
   "description": "CLI application to manage smart contract documentation",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -46,6 +46,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@bonadocs/core": "^1.0.3-alpha.59",
     "ethers": "^6.9.1",
     "glob": "^10.3.10",
     "inquirer": "^8.2.6",
